@@ -1,26 +1,21 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from 'react';
+import Square from './components/Square';
+class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+    };
+  }
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+  render() {
+    return (
+      <div id="main">
+        <Square Id="A" latlng={{latitude:0.0,longitude:0.0}} size={{width:'3%',height:'3%'}} colour="#db3e00"/>
+        <Square Id="B" latlng={{latitude:0.0,longitude:0.0}} size={{width:'3%',height:'3%'}} colour="#ba68c8"/>
+        <Square Id="C" latlng={{latitude:0.0,longitude:0.0}} size={{width:'3%',height:'3%'}} colour="#ff8a65"/>
+      </div>
+    );
+  }
 }
 
 export default App;
