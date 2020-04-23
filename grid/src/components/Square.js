@@ -23,24 +23,30 @@ class Square extends Component {
     }
 
     componentDidMount() {
-        fetch('/square/'+this.state.Id, {
+        fetch('http://192.168.43.115:5000/square/'+this.state.Id, {
             method: "post",
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 Id:this.state.Id
             })
-        }).then(res => res.json())
+        })
+        .then(res => res.json())
         .then(data => {
             this.setState({
                 products:data
             });
+            console.log(this.state.products);
         });
     }
 
     togglePopup() {  
         this.setState({  
              showPopup: !this.state.showPopup  
-        });  
+        });
+        if(this.state.showPopup)
+        {
+            alert("x="+this.state.latlng.latitude+" y="+this.state.latlng.longitude);
+        }  
     } 
     
     handleStop = (e)=> {
