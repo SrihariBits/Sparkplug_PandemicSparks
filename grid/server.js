@@ -8,6 +8,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 const csvjson = require('csvjson');
 const readFile = require('fs').readFile;
+const writeFile = require('fs').writeFileSync;
 
 //serve react static files.
 app.use(express.static(path.join(__dirname, 'client/build')));
@@ -51,6 +52,22 @@ app.post('/square/C',(req,res) => {
         }
         jsonObj = csvjson.toObject(fileContent);
         res.send(jsonObj);
+    });  
+})
+
+app.post('/warehouseSave',(req,res) => {
+    console.log(req.body.data);
+    writeFile('./files/warehouse.json', JSON.stringify(req.body.data));
+})
+
+app.get('/warehouseLoad',(req,res) => {
+    readFile('./files/warehouse.json', 'utf-8', (err, fileContent) => {
+        if(err) {
+            console.log(err);
+            throw new Error(err);
+        }
+        
+        res.send(JSON.stringify(fileContent));
     });  
 })
 

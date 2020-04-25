@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import Square from './components/Square';
+import FloorPlan from './components/FloorPlan';
 class App extends Component {
   constructor(props) {
     super(props);
@@ -10,9 +10,7 @@ class App extends Component {
   render() {
     return (
       <div id="main">
-        <Square Id="A" latlng={{latitude:0.0,longitude:0.0}} size={{width:'3%',height:'3%'}} colour="#db3e00"/>
-        <Square Id="B" latlng={{latitude:0.0,longitude:0.0}} size={{width:'3%',height:'3%'}} colour="#ba68c8"/>
-        <Square Id="C" latlng={{latitude:0.0,longitude:0.0}} size={{width:'3%',height:'3%'}} colour="#ff8a65"/>
+        <FloorPlan isAdmin={true}/>
       </div>
     );
   }
