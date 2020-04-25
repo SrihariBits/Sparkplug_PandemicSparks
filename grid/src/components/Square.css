@@ -1,0 +1,18 @@
+.square-grid__cell {
+    box-shadow: 0 0 0 1px black;
+    overflow: hidden;
+    position: relative;
+}
+
+.square-grid__content {
+    left: 0;
+    position: absolute;
+    top: 0;
+}
+
+.square-grid__cell:after {
+    content: '';
+    display: block;
+    padding-bottom: 100%;
+}
+
