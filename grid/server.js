@@ -44,7 +44,7 @@ app.post('/square/B',(req,res) => {
            
 })
 
-app.post('/square/C',(req,res) => {
+app.post('/square/',(req,res) => {
     readFile('./files/square_products'+req.body.Id+'.csv', 'utf-8', (err, fileContent) => {
         if(err) {
             console.log(err);
