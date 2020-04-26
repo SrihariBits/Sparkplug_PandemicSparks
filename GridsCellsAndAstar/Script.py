@@ -40,7 +40,6 @@ def astar(grid, start, end, dims):
     cost = []
     vis = []
     parents = []
-    print(dims)
     for i in range(dims[0]):
         tmp = []
         for j in range(dims[1]):
@@ -48,48 +47,28 @@ def astar(grid, start, end, dims):
         parents.append(tmp)
         vis.append([0]*dims[1])
         cost.append([100000*100]*dims[1])
-    # print(cost)
-    # print(vis)
-    # print(parents)
 
     cost[start[0]][start[1]] = 0
-    # parents[start[0]][start[1]] = (0,0)
     costlist = SortedList()
     costlist.add((cost[start[0]][start[1]], start))
     while(True):
-        print()
-        print()
-        # print("inside while")
-        # print(costlist)
         node = costlist[0][1]
         cst = costlist[0][0]
-        # print("*****************")
-        print(node)
-        # print(cst)
-        # print(costlist[0])
-        # print("*****************")
         costlist.discard(costlist[0])
         if vis[node[0]][node[1]]==1:
             continue
         vis[node[0]][node[1]] = 1
-        print(vis)
         adj = getValid(node, dims)
         flag = 0
         for coord in adj:
-            # print(coord)
-            # print(vis[coord[0]][coord[1]])
             if vis[coord[0]][coord[1]]==1:
-                # print("TREU")
                 continue
-            f = cst + grid[coord[0]][coord[1]].cost
+            g = cost[node[0]][node[1]] + grid[coord[0]][coord[1]].cost
             h = heuristic(coord[0], coord[1], end)
-            if f<=cost[coord[0]][coord[1]]:
-                print("before assigning: ", node)
-                print(coord)
+            if g<=cost[coord[0]][coord[1]]:
                 parents[coord[0]][coord[1]] = node
-                costlist.add((f+h,coord))
-                cost[coord[0]][coord[1]] = f
-                print(parents)
+                costlist.add((g+h,coord))
+                cost[coord[0]][coord[1]] = g
             
             if coord==end:
                 flag = 1
@@ -98,13 +77,9 @@ def astar(grid, start, end, dims):
         if flag==1:
             break
     
-    print("path")
-    # print(parents)
-    print(getPath(start, end, parents))
-    print("\n\n")
-
-
-    return cost
+    # print(cost)
+    # print("\n\n")
+    return (cost[end[0]][end[1]],getPath(start, end, parents))
 
 
 
@@ -112,7 +87,6 @@ grid = []
 dims = (5,5)
 
 maxcost = 100000
-
 
 
 for i in range(dims[0]):
@@ -131,22 +105,33 @@ grid[2][1].addItems(["a", "b",  "c"])
 grid[2][3].updateCost(maxcost)
 grid[2][3].addItems(["a", "b",  "c"])
 
-# for(int k = 1; k <= n; k++){
-#     for(int i = 1; i <= n; i++){
-#         for(int j = 1; j <= n; j++){
-#             dist[i][j] = min( dist[i][j], dist[i][k] + dist[k][j] );
-#         }
-#     }
-# }
-
-
-
-
-
+def findshortestpath(grid, dims, start, end, nodes):
+    tmp = start
+    paths = []
+    while nodes!=[]:
+        short = SortedList()
+        for node in nodes:
+            # print(astar(grid, tmp, node, dims))
+            short.add(astar(grid, tmp, node, dims))
+        print(short)
+        short[0][1].reverse()
+        paths.append(short[0][1])
+        print(nodes)
+        print(short[0][1])
+        tmp = short[0][1][len(short[0][1])-1]
+        nodes.remove(tmp)
+    
+    retpath = astar(grid, paths[-1][-1], end, dims)
+    retpath[1].reverse()
+    paths.append(retpath[1])
+    return paths
 
 start = (1,3)
-end = (3,3)
-print(astar(grid, start, end,dims))
+end = (4,3)
+print(astar(grid, start, end, dims))
+nodes = [(1,1), (4,2), (2,4), (4,4)]
+print("multiple paths")
+print(findshortestpath(grid, dims, (1,3), (1,3), nodes))
 
 
 
