@@ -60,6 +60,28 @@ app.post('/warehouseSave',(req,res) => {
     writeFile('./files/warehouse.json', JSON.stringify(req.body.data));
 })
 
+app.get('/gridLocation',(req,res)=>{
+    readFile('./files/warehouse.json', 'utf-8', (err, fileContent) => {
+        if(err) {
+            console.log(err);
+            throw new Error(err);
+        }
+
+        var coords=[];
+        var dat = JSON.parse(fileContent);
+        for(const property in dat.layers)
+        {
+            for(const hash in dat.layers[property].items)
+            {
+            coords=[...coords,...[{x:dat.layers[property].items[hash].x,y:dat.layers[property].items[hash].y}]];
+            }
+        }
+        console.log(coords);
+        res.send(fileContent);
+    });
+})
+
+
 app.get('/warehouseLoad',(req,res) => {
     readFile('./files/warehouse.json', 'utf-8', (err, fileContent) => {
         if(err) {

@@ -3,11 +3,12 @@
 3) Click on Load button from the UI
 4) Make any changes - plus can add components, 3D or 3D first person view, click on component and change size and colour
 5) Click on save button
-7) Try these with isAdmin = false in App.js props to FloorPlan.js
+6) Click on any box, go to 'List of items' and click it (currently only top-right box of top left blue boxes work....should add after mongoDB)
+7) Go to localhost:5000/gridLocation for a list of coords (object of x and y) of all boxes
+8) Try these with isAdmin = false in App.js props to FloorPlan.js
 
 TODO
 1) Extract x and y coords on a click
-2) Show a button to display list of items in the grid cell
 3) Plot all points
 4) Run clustering algorithm
 
