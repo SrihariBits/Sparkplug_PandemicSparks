@@ -30,7 +30,7 @@ app.get('/',(req,res) => {
 
 let jsonObj={};
 app.post('/square/A',(req,res) => {
-    readFile('./files/square_products'+req.body.Id+'.csv', 'utf-8', (err, fileContent) => {
+    readFile('./../frontend/files/square_products'+req.body.Id+'.csv', 'utf-8', (err, fileContent) => {
         if(err) {
             console.log(err);
             throw new Error(err);
@@ -41,7 +41,7 @@ app.post('/square/A',(req,res) => {
 })
 
 app.post('/square/B',(req,res) => {    
-    readFile('./files/square_products'+req.body.Id+'.csv', 'utf-8', (err, fileContent) => {
+    readFile('./../frontend/files/square_products'+req.body.Id+'.csv', 'utf-8', (err, fileContent) => {
         if(err) {
             console.log(err);
             throw new Error(err);
@@ -53,7 +53,7 @@ app.post('/square/B',(req,res) => {
 })
 
 app.post('/square/C',(req,res) => {
-    readFile('./files/square_products'+req.body.Id+'.csv', 'utf-8', (err, fileContent) => {
+    readFile('./../frontend/files/square_products'+req.body.Id+'.csv', 'utf-8', (err, fileContent) => {
         if(err) {
             console.log(err);
             throw new Error(err);
@@ -65,11 +65,11 @@ app.post('/square/C',(req,res) => {
 
 app.post('/warehouseSave',(req,res) => {
     console.log(req.body.data);
-    writeFile('./files/warehouse.json', JSON.stringify(req.body.data));
+    writeFile('./../frontend/files/warehouse.json', JSON.stringify(req.body.data));
 })
 
 app.get('/warehouseLoad',(req,res) => {
-    readFile('./files/warehouse.json', 'utf-8', (err, fileContent) => {
+    readFile('./../frontend/files/warehouse.json', 'utf-8', (err, fileContent) => {
         if(err) {
             console.log(err);
             throw new Error(err);
