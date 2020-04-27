@@ -23,7 +23,7 @@ class Square extends Component {
     }
 
     componentDidMount() {
-        fetch('http://192.168.43.115:5000/square/'+this.state.Id, {
+        fetch('http://127.0.0.1:5000/square/'+this.state.Id, {
             method: "post",
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
