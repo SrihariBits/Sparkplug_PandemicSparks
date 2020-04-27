@@ -12,11 +12,19 @@ const writeFile = require('fs').writeFileSync;
 
 // Set up mongoose connection
 var mongoose = require('mongoose');
-var mongoDB = ""
+var mongoDB = "mongodb+srv://daksh:daksh@cluster0-rzpnp.mongodb.net/walmartsparkplug?retryWrites=true&w=majority";
 mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true });
 mongoose.Promise = global.Promise;
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+db.on('connected', function(){  
+    var datetime = new Date(Date.now() + 5.5);
+    console.log("Mongoose default connection is open at: "+datetime.toString());
+    mongoose.connection.db.listCollections().toArray(function (err, names) {
+        console.log(names); // [{ name: 'dbname.myCollection' }]
+        module.exports.Collection = names;
+    });
+ });
 
 //serve react static files.
 app.use(express.static(path.join(__dirname, 'client/build')));
@@ -29,10 +37,15 @@ app.get('/',(req,res) => {
 });
 
 var items = require('./../public/Models/Items');
+let msg = new items({
+    Id: "iIBYMZGPg",
+    products:[{productId:"PR12ERT45",description:"Avian Mineral Water",currencyAmount:"4.99",currencyUnit:"USD"},
+              {productId:"PR45GHT98",description:"Tide Detergent",currencyAmount:"7.99",currencyUnit:"USD"}]
+  })
 app.post('/items',(req,res) => {
-    console.log("hui");
     items.findOne({Id:req.body.Id},function(err,data){
         if(data===null){
+            msg.save();
             res.json({    
                 present:false
             });
