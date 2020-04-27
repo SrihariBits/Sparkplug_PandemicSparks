@@ -2,7 +2,7 @@
 
 # dependencies
 /node_modules
-!node_modules/react-planner
+!/node_modules/react-planner
 /.pnp
 .pnp.js
 
