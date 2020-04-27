@@ -80,7 +80,7 @@ app.get('/warehouseLoad',(req,res) => {
 })
 
 app.get('/gridLocation',(req,res)=>{
-    readFile('./files/warehouse.json', 'utf-8', (err, fileContent) => {
+    readFile('./../frontend/files/warehouse.json', 'utf-8', (err, fileContent) => {
         if(err) {
             console.log(err);
             throw new Error(err);
