@@ -52,7 +52,7 @@ app.post('/square/B',(req,res) => {
            
 })
 
-app.post('/square/C',(req,res) => {
+app.post('/square/',(req,res) => {
     readFile('./../frontend/files/square_products'+req.body.Id+'.csv', 'utf-8', (err, fileContent) => {
         if(err) {
             console.log(err);
@@ -78,6 +78,29 @@ app.get('/warehouseLoad',(req,res) => {
         res.send(JSON.stringify(fileContent));
     });  
 })
+
+app.get('/gridLocation',(req,res)=>{
+    readFile('./files/warehouse.json', 'utf-8', (err, fileContent) => {
+        if(err) {
+            console.log(err);
+            throw new Error(err);
+        }
+
+        var coords=[];
+        var dat = JSON.parse(fileContent);
+        for(const property in dat.layers)
+        {
+            for(const hash in dat.layers[property].items)
+            {
+            coords=[...coords,...[{x:dat.layers[property].items[hash].x,y:dat.layers[property].items[hash].y}]];
+            }
+        }
+        console.log(coords);
+        res.send(fileContent);
+    });
+})
+
+
 
 app.listen(port, () => {
     console.log(`server running on : "http://localhost:${port}"`);
