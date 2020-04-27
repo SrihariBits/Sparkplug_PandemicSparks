@@ -28,6 +28,27 @@ app.get('/',(req,res) => {
     res.send("hi");
 });
 
+var items = require('./../public/Models/Items');
+app.post('/items',(req,res) => {
+    console.log("hui");
+    items.findOne({Id:req.body.Id},function(err,data){
+        if(data===null){
+            res.json({    
+                present:false
+            });
+        }
+        else{
+            res.json({
+                products:data.products,
+                present:true
+            });
+        }
+    });
+  })
+
+
+
+
 let jsonObj={};
 app.post('/square/A',(req,res) => {
     readFile('./../frontend/files/square_products'+req.body.Id+'.csv', 'utf-8', (err, fileContent) => {
