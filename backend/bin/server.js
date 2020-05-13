@@ -102,6 +102,28 @@ app.post('/warehouseSave',(req,res) => {
     writeFile('./../frontend/files/warehouse.json', JSON.stringify(req.body.data));
 })
 
+app.post('/delete',(req,res) => {
+    console.log(req.body.Id);
+    readFile('./../frontend/files/warehouse.json', 'utf-8', (err, fileContent) => {
+        if(err) {
+            console.log(err);
+            throw new Error(err);
+        }
+
+        var dat = JSON.parse(fileContent);
+        for(const property in dat.layers)
+        {
+            delete dat.layers[property].items[req.body.Id];
+        }
+        
+        writeFile('./../frontend/files/warehouse.json', JSON.stringify(dat));
+        res.json({
+            deleted:true
+        })
+    });
+
+})
+
 app.get('/warehouseLoad',(req,res) => {
     readFile('./../frontend/files/warehouse.json', 'utf-8', (err, fileContent) => {
         if(err) {
