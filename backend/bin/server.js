@@ -37,12 +37,16 @@ app.get('/',(req,res) => {
 });
 
 var items = require('./../public/Models/Items');
-let msg = new items({
-    Id: "iIBYMZGPg",
-    products:[{productId:"PR12ERT45",description:"Avian Mineral Water",currencyAmount:"4.99",currencyUnit:"USD"},
-              {productId:"PR45GHT98",description:"Tide Detergent",currencyAmount:"7.99",currencyUnit:"USD"}]
-  })
+let msg;
 app.post('/items',(req,res) => {
+    readFile('./products/'+req.body.Id+'.csv', 'utf-8', (err, fileContent) => {
+        if(err) {
+            console.log(err);
+            throw new Error(err);
+        }
+        jsonObj = csvjson.toObject(fileContent);
+        msg = new items({Id:req.body.Id,products:jsonObj});
+    });
     items.findOne({Id:req.body.Id},function(err,data){
         if(data===null){
             msg.save();
@@ -59,9 +63,7 @@ app.post('/items',(req,res) => {
     });
   })
 
-
-
-
+/*
 let jsonObj={};
 app.post('/square/A',(req,res) => {
     readFile('./../frontend/files/square_products'+req.body.Id+'.csv', 'utf-8', (err, fileContent) => {
@@ -96,7 +98,7 @@ app.post('/square/',(req,res) => {
         res.send(jsonObj);
     });  
 })
-
+*/
 app.post('/warehouseSave',(req,res) => {
     console.log(req.body.data);
     writeFile('./../frontend/files/warehouse.json', JSON.stringify(req.body.data));
