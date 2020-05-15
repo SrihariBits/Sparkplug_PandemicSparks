@@ -1,8 +1,12 @@
+Hash Ids of boxes in our iU_SiFWzb
+
+[top-left, blue, 4] = {***SEAFOOD***}
 s957e6HPG
 iIBYMZGPg
 Ybh1w_CLk
 HDgTHpob9
 
+[top-left, grey-brown, 6] = {***BULK BUYS - check walmart website***}
 ​O9AbMR58p
 F8sY0oMjs
 UadYAHxwq
@@ -10,6 +14,7 @@ VA9cIni74
 7e0ydWxnS
 5zvxlvOch
 
+[middle-left, green, 6+6] = {***PRODUCE - grocery and fresh veggies***}
 ​VZt4VfP8K
 98QxUG1sE
 CoMeoV5kI
@@ -24,9 +29,11 @@ bkjQpwphc
 6WKW2qKAK
 T-H2maQ88
 
+[bottom-left, white(should be pink), 2] = {***FLORIST***}
 ​D80vcGCMD
 NXsR8HBiw
 
+[top-middle, red, 8] = {***MEAT***}
 jl9_jN96b
 rzgzg4Ge7
 6CYv45quk
@@ -36,6 +43,8 @@ qBrKYxcZC
 J7YTA8VWw
 4kiipVGrn
 
+[middle (first 4 columns of two middle rows), brown-black, 48] = {***GROCERY (like chilly powder)***}
+                                                                 {Also add toys and electronics somewhere}
 dYL1dFxQu
 TgVNNdIxS
 BQB7Xz72x
@@ -85,6 +94,7 @@ VBKUtMInA
 sVqXAVN1w
 a1dX91bW9
 
+[middle-right,(last 3 columns of first row only), brown-black, 18] = {***BATH ITEMS***}
 ​bDZgUwaY7
 c7SjMK8u9
 JZET09XlZ
@@ -104,6 +114,7 @@ EA6Ex4Msw
 BvunvqfcV
 sBzPpqj9t
 
+[middle-right,(last 3 columns of first row only), brown-black, 18] = {***FROZEN and COLD STORAGE***}
 DHoJSHhu_
 78Tsx5gza
 jm4VmMQ4f
@@ -123,11 +134,13 @@ lx9sJ2Ytg
 wdp_ykRCg
 ZafyDnzoF
 
+[top-right, yellow, 4] = {***DAIRY, EGGS and CHEESE***}
 M4kd6obI8
 lFzLnLSxn
 j0-EgeaMd
 Ap1Y2inZ6
 
+[top-right, dark brown, 9] = {***WINE and SPIRITS***}
 ​a_XonwtL3
 FHQv1wRyf
 gEcF9uFKi
@@ -138,6 +151,7 @@ Rz48Vjb78
 pErmgz52H
 utDo02yyG
 
+[middle-right, orange, 6] = {***BAKERY***}
 ​M9N8k7nIj
 N2sMYxPs5
 HwRl74jKw
@@ -145,6 +159,7 @@ Th-wTT_u0
 9Zq0_POhY
 wS9tUQlwI
 
+[bottom-right, dark pink, 9] = {***DELI AND PREPARED FOODS***}
 ​abDXCqtgY
 5X8zs4k82
 gnpUlsvtN
@@ -154,4 +169,3 @@ NjRygsyxc
 kdV9Z9GcL
 N3ytQ0_ht
 f1-ksYKl8
-
