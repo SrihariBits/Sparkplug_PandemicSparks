@@ -56,5 +56,4 @@ class FloorPlan extends Component {
     );
   }
 }
-
 export default FloorPlan;

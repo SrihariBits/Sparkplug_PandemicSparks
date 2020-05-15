@@ -63,6 +63,31 @@ app.post('/items',(req,res) => {
     });
   })
 
+
+  app.post('/pathmaker',(req,res) => {
+    readFile('./public/PathFinding/path.csv', 'utf-8', (err, fileContent) => {
+        if(err) {
+            console.log(err);
+            throw new Error(err);
+        }
+        jsonObj = csvjson.toObject(fileContent);
+        var template = {id:"layer2",altitude:0,order:0,opacity:1,name:"layer2",visible:true,vertices:{},lines:{},holes:{},areas:{},items:{},selected:{vertices:[],lines:[],holes:[],areas:[],items:[]}};
+        jsonObj.forEach(
+            function myfunction(item,index){
+                var pathguy={id:"p"+index,type:"path",prototype:"items",name:"Path",misc:{},selected:false,
+                properties:{color:"#9c27b0",width:{length:100,unit:"cm"},height:{length:100,unit:"cm"},
+                depth:{length:100,unit:"cm"}},visible:true,x:0,y:0,rotation:0}
+                pathguy.x = item.x;
+                pathguy.y = item.y;
+                size = Object.keys(template.items).length;
+                template.items["p"+size] = pathguy;
+            }
+        )
+        res.json({
+            data:template
+        });
+    });
+  })
 /*
 let jsonObj={};
 app.post('/square/A',(req,res) => {
@@ -153,7 +178,7 @@ app.get('/gridLocation',(req,res)=>{
             coords=[...coords,...[{x:dat.layers[property].items[hash].x,y:dat.layers[property].items[hash].y}]];
             }
         }
-        console.log(coords);
+        writeFile('./public/PathFinding/gridLocation.csv', JSON.stringify(coords));
         res.send(fileContent);
     });
 })
