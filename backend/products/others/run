@@ -1,0 +1,6 @@
+#!/bin/bash
+while read p; do
+  echo 'productId,description,unitPrice,currencyUnit'>>$p'.csv'
+  echo 'PR12ERT45,Avian Mineral Water,4.99,USD'>>$p'.csv'
+  echo 'PR45GHT98,Tide Detergent,7.99,USD'>>$p'.csv'
+done <hexlist.txt

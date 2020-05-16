@@ -10,6 +10,7 @@ const csvjson = require('csvjson');
 const readFile = require('fs').readFile;
 const writeFile = require('fs').writeFileSync;
 
+////////////////////////////////////// MONGOOSE CONNECTION /////////////////////////////////////////////
 // Set up mongoose connection
 var mongoose = require('mongoose');
 var mongoDB = "mongodb+srv://daksh:daksh@cluster0-rzpnp.mongodb.net/walmartsparkplug?retryWrites=true&w=majority";
@@ -30,19 +31,73 @@ db.on('connected', function(){
 app.use(express.static(path.join(__dirname, 'client/build')));
 app.use(bodyParser.json());
 app.use(cors());
+////////////////////////////// MONGOOSE VARS //////////////////////////////////////////////////////////
 
-app.get('/',(req,res) => {
-    // console.log(req);
-    res.send("hi");
+var walkets = require('./../public/Models/WalKet');
+var items = require('./../public/Models/Items');
+
+//////////////////////////////////// WALKET ORDERS/////////////////////////////////////////////////////
+let message=new walkets({
+    ShipToAddress:{
+        address:{
+            addressLineTwo:"chennai,TN",
+            countryCode:"TN",
+            addressType:"Residential",
+            postalCode:"600020",
+            addressLineOne:"1/23 Adyar"
+        },
+        phone:{
+            completeNumber:"1234567899"
+        },
+        name:{
+            firstName:"John",
+            lastName:"Doe",
+            completeName:"John Doe"
+        },
+    },
+    orderTotals:{
+        grandTotal:{
+            currencyAmount:"100",
+            currencyUnit:"USD"
+        }
+    },
+    orderNo:"1a2b3c",
+    products:[
+        {
+            productId:"dYL1dFxQu",
+            description:"Frozen II Blue Ray",
+            unitPrice:{
+                currencyAmount:"24.96",
+                currencyUnit:"USD"
+            },
+            orderQuantity:"2"
+        }
+    ],
+    event_time: new Date()
 });
 
-var items = require('./../public/Models/Items');
+walkets.findOne({orderNo:message.orderNo},function(err,data){
+    if(data===null)
+    {
+        message.save();
+    }
+});
+///////////////////////////////////////////// PRIMARY CLUSTERING /////////////////////////////////////////////////
+
+var Mapper = new Map();
+readFile('./products/others/Mapper.csv', 'utf-8', (err, fileContent) => {
+    if(err) {
+        console.log(err);
+        throw new Error(err);
+    }
+    jsonObj = csvjson.toObject(fileContent);
+    jsonObj.forEach((item)=>Mapper.set(item.hash,item.assignment));
+});
+
+//////////////////////////////////////// CELL's ITEMS /////////////////////////////////////////////////
+
 let msg;
 app.post('/items',(req,res) => {
-    /*console.log(req.body.Id);
-    readFile('./products/'+req.body.Id+'.csv', 'utf-8', (err, fileContent) => {
-        console.log(fileContent);
-    })*/
     readFile('./products/'+req.body.Id+'.csv', 'utf-8', (err, fileContent) => {
         if(err) {
             console.log(err);
@@ -70,6 +125,7 @@ app.post('/items',(req,res) => {
     });
   })
 
+//////////////////////////////// SHOWING ASSOCIATE PATH ///////////////////////////////////////////////
 
   app.post('/pathmaker',(req,res) => {
     readFile('./public/PathFinding/path.csv', 'utf-8', (err, fileContent) => {
@@ -133,42 +189,9 @@ app.post('/items',(req,res) => {
         });
     });
   })
-/*
-let jsonObj={};
-app.post('/square/A',(req,res) => {
-    readFile('./../frontend/files/square_products'+req.body.Id+'.csv', 'utf-8', (err, fileContent) => {
-        if(err) {
-            console.log(err);
-            throw new Error(err);
-        }
-        jsonObj = csvjson.toObject(fileContent);
-        res.send(jsonObj);
-    });        
-})
 
-app.post('/square/B',(req,res) => {    
-    readFile('./../frontend/files/square_products'+req.body.Id+'.csv', 'utf-8', (err, fileContent) => {
-        if(err) {
-            console.log(err);
-            throw new Error(err);
-        }
-        jsonObj = csvjson.toObject(fileContent);
-        res.json(jsonObj);
-    });
-           
-})
+//////////////////////////////////// WAREHOUSE STUFF //////////////////////////////////////////////////
 
-app.post('/square/',(req,res) => {
-    readFile('./../frontend/files/square_products'+req.body.Id+'.csv', 'utf-8', (err, fileContent) => {
-        if(err) {
-            console.log(err);
-            throw new Error(err);
-        }
-        jsonObj = csvjson.toObject(fileContent);
-        res.send(jsonObj);
-    });  
-})
-*/
 app.post('/warehouseSave',(req,res) => {
     console.log(req.body.data);
     writeFile('./../frontend/files/warehouse.json', JSON.stringify(req.body.data));
@@ -207,6 +230,8 @@ app.get('/warehouseLoad',(req,res) => {
     });  
 })
 
+////////////////////////////// PRINTING CELL COORDS INTO FILE /////////////////////////////////////////
+
 app.get('/gridLocation',(req,res)=>{
     readFile('./../frontend/files/warehouse.json', 'utf-8', (err, fileContent) => {
         if(err) {
@@ -228,8 +253,11 @@ app.get('/gridLocation',(req,res)=>{
     });
 })
 
-
+///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 app.listen(port, () => {
     console.log(`server running on : "http://localhost:${port}"`);
 });
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////
