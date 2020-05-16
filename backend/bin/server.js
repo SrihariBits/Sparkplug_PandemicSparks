@@ -86,6 +86,7 @@ app.post('/items',(req,res) => {
         jsonObj.forEach(
             function myfunction(item,index){
                 readout.push(item.path);
+                readout.push(' ');
                 switch(item.path) {
                     case 'straight':
                         switch(direction){

@@ -10,7 +10,7 @@ class App extends Component {
   render() {
     return (
       <div id="main">
-        <FloorPlan isAdmin={true}/>
+        <FloorPlan isAdmin={false}/>
       </div>
     );
   }
