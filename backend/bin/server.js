@@ -78,10 +78,46 @@ app.post('/items',(req,res) => {
             throw new Error(err);
         }
         jsonObj = csvjson.toObject(fileContent);
-        var template = {id:"layer2",altitude:0,order:0,opacity:1,name:"layer2",visible:true,vertices:{},lines:{},holes:{},areas:{},items:{},selected:{vertices:[],lines:[],holes:[],areas:[],items:[]}};
+        var template = {id:"layer2",altitude:0,order:0,opacity:1,name:"layer2",visible:true,vertices:{},lines:{},
+                        holes:{},areas:{},items:{},selected:{vertices:[],lines:[],holes:[],areas:[],items:[]}};
+        var direction = 'north';
+        var pathtype ;
+        var readout = [];
         jsonObj.forEach(
             function myfunction(item,index){
-                var pathguy={id:"p"+index,type:item.path,prototype:"items",name:"Path",misc:{},selected:false,
+                readout.push(item.path);
+                switch(item.path) {
+                    case 'straight':
+                        switch(direction){
+                            case 'north': pathtype = 'pathVT';break;
+                            case 'south': pathtype = 'pathVT';break;
+                            case 'east': pathtype = 'pathHZ';break;
+                            case 'west': pathtype = 'pathHZ';break;
+                            default: pathtype = 'pathHZ';
+                        }
+                        break;
+                    case 'left':
+                        switch(direction){
+                            case 'north': direction = 'west';pathtype = 'pathNW';break;
+                            case 'south': direction = 'east';pathtype = 'pathSE';break;
+                            case 'east': direction = 'north';pathtype = 'pathSW';break;
+                            case 'west': direction = 'south';pathtype = 'pathNE';break;
+                            default: pathtype = 'pathHZ';
+                        }
+                        break;
+                    case 'right':
+                        switch(direction){
+                            case 'north': direction = 'east';pathtype = 'pathNE';break;
+                            case 'south': direction = 'west';pathtype = 'pathSW';break;
+                            case 'east': direction = 'south';pathtype = 'pathNW';break;
+                            case 'west': direction = 'north';pathtype = 'pathSE';break;
+                            default: pathtype = 'pathHZ';
+                        }
+                        break;
+                    default:
+                      pathtype = 'pathHZ'
+                } 
+                var pathguy={id:"p"+index,type:pathtype,prototype:"items",name:"Path",misc:{},selected:false,
                 properties:{color:"#9c27b0",width:{length:100,unit:"cm"},height:{length:100,unit:"cm"},
                 depth:{length:100,unit:"cm"}},visible:true,x:0,y:0,rotation:0}
                 pathguy.x = item.x;
@@ -91,7 +127,8 @@ app.post('/items',(req,res) => {
             }
         )
         res.json({
-            data:template
+            data:template,
+            readout:readout
         });
     });
   })
