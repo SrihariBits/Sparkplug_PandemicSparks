@@ -39,19 +39,26 @@ app.get('/',(req,res) => {
 var items = require('./../public/Models/Items');
 let msg;
 app.post('/items',(req,res) => {
+    /*console.log(req.body.Id);
+    readFile('./products/'+req.body.Id+'.csv', 'utf-8', (err, fileContent) => {
+        console.log(fileContent);
+    })*/
     readFile('./products/'+req.body.Id+'.csv', 'utf-8', (err, fileContent) => {
         if(err) {
             console.log(err);
             throw new Error(err);
         }
         jsonObj = csvjson.toObject(fileContent);
+        console.log(jsonObj);
         msg = new items({Id:req.body.Id,products:jsonObj});
+        console.log(msg);
     });
     items.findOne({Id:req.body.Id},function(err,data){
         if(data===null){
             msg.save();
             res.json({    
-                present:false
+                present:false,
+                products:msg.products
             });
         }
         else{
