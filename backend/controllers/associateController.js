@@ -37,6 +37,7 @@ exports.associate_create_post = function(req, res) {
         'first_name': req.body.first_name,
         'last_name': req.body.last_name,
         'location': req.body.location,
+        'is_admin': req.body.is_admin,
     }
 
     res_data = {}

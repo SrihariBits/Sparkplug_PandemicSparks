@@ -22,7 +22,7 @@ var CustomerSchema = new Schema({
         type: String,
         max: [100, "Please use less than 100 letters"],
         required: true,
-    }
+    },
 });
 
 CustomerSchema
