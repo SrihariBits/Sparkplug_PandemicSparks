@@ -16,7 +16,7 @@ var productRouter = require("../routes/products");
 ////////////////////////////////////// MONGOOSE CONNECTION /////////////////////////////////////////////
 // Set up mongoose connection
 var mongoose = require('mongoose');
-var mongoDB = "";
+var mongoDB = "mongodb+srv://daksh:daksh@cluster0-rzpnp.mongodb.net/walmartsparkplug?retryWrites=true&w=majority";
 mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true });
 mongoose.Promise = global.Promise;
 var db = mongoose.connection;
@@ -67,10 +67,10 @@ let message=new walkets({
             currencyUnit:"USD"
         }
     },
-    orderNo:"1a2b3c",
+    orderNo:"1a2b3d",
     products:[
         {
-            productId:"dYL1dFxQu",
+            productId:"PR38KAC10",
             description:"Frozen II Blue Ray",
             unitPrice:{
                 currencyAmount:"24.96",
@@ -103,8 +103,9 @@ if(Mapper.size===0)
         jsonObj.forEach((item)=>Mapper.set(item.hash,item.assignment));
     });
 }
+
 app.post('/findPrimaryCluster',(req,res) => {
-    items.findOne({'items.products':{$elemMatch: {productId:req.body.productId}}},function(err,data){
+    items.findOne({'products':{$elemMatch: {productId:req.body.productId}}},function(err,data){
         if(err) {
             console.log(err);
             throw new Error(err);
@@ -122,14 +123,65 @@ app.post('/findPrimaryCluster',(req,res) => {
         }
     });
   })
+
+///////////////////////////////// GET ORDERS IN FIFO //////////////////////////////////////////////////
+
+var numberToReceive = 10;
+var currentOrders = [];
+var clustersPresent = new Set();
+var avgDistance = new Map();
+var hclusterInput = [];
+walkets
+  .find({orderNo:{ $ne: null }})
+  .sort({'event_time': 1})
+  .limit(numberToReceive)
+  .exec(function(err, posts) {
+    posts.forEach((order)=>{
+        currentOrders.push(order);
+        order.products.map((item)=>{
+            clustersPresent.add(Mapper.get(item.productId));
+            items
+                .findOne({'products':{$elemMatch: {productId:item.productId}}},function(err,data){
+                    if(err) {
+                        console.log(err);
+                        throw new Error(err);
+                    }
+                    else{
+                        var temp = Mapper.get(data.Id);
+                        if(!avgDistance.has(temp))
+                        {
+                            console.log(data);
+                            avgDistance.set(temp,[parseInt(data.x),parseInt(data.y),1]);
+                            console.log(avgDistance.get(temp));
+                        }
+                        else{
+                            var a = avgDistance.get(temp)[0];
+                            avgDistance.set(temp,a+parseInt(data.x));
+                            var b = avgDistance.get(temp)[1];
+                            avgDistance.set(temp,b+parseInt(data.y));
+                            var d = avgDistance.get(temp)[2];
+                            avgDistance.set(temp,d+1);
+                        }
+                    }
+                });
+        });
+    });
+    avgDistance.forEach((tuple)=>{
+        hclusterInput.push([tuple[0]/tuple[2],tuple[1]/tuple[2]]);
+    });
+    console.log("hi"+hclusterInput);
+  });
+
+ 
 ///////////////////////////////// SECONDARY CLUSTERING ////////////////////////////////////////////////
 
  var hclustering = require("./../public/SecondaryClustering/HierarchicalClustering");
- //var c = hclustering.hierarchicalCluster(colors, "manhattan", "complete",50);
- //console.log(JSON.stringify(c));
+ var c = hclustering.hierarchicalCluster(hclusterInput, "manhattan", "complete",50);
+ console.log(JSON.stringify(c));
  app.get('/cluster',(req,res)=>{
-     //res.send(c);
+     res.send(c);
  })
+
 //////////////////////////////////////// CELL's ITEMS /////////////////////////////////////////////////
 
 let msg;

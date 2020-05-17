@@ -3,6 +3,8 @@
 
     var Items=new mongoose.Schema({
     Id:String,
+    x:String,
+    y:String,
     products:[{productId:String,description:String,unitPrice:String,currencyUnit:String}]
     });
 
