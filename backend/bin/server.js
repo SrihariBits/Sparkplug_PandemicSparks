@@ -16,7 +16,7 @@ var productRouter = require("../routes/products");
 ////////////////////////////////////// MONGOOSE CONNECTION /////////////////////////////////////////////
 // Set up mongoose connection
 var mongoose = require('mongoose');
-var mongoDB = "mongodb+srv://daksh:daksh@cluster0-rzpnp.mongodb.net/walmartsparkplug?retryWrites=true&w=majority";
+var mongoDB = "";
 mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true });
 mongoose.Promise = global.Promise;
 var db = mongoose.connection;
