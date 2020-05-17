@@ -1,13 +1,28 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import {Route, Link, BrowserRouter as Router, Switch} from "react-router-dom";
+
 import './index.css';
-import App from './App';
 import * as serviceWorker from './serviceWorker';
 
-ReactDOM.render(
+import App from './App';
+import HomePage from './components/HomePage';
+import ErrorPage from './components/ErrorPage';
+
+const routing = (
   <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+    <Router>
+      <Switch>
+        <Route exact path="/" component={App} />
+        <Route exact path="/home" component={HomePage} />
+        <Route component={ErrorPage} />
+      </Switch>
+    </Router>
+  </React.StrictMode>
+)
+
+ReactDOM.render(
+  routing,
   document.getElementById('root')
 );
 
