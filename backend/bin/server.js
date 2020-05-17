@@ -10,6 +10,8 @@ const csvjson = require('csvjson');
 const readFile = require('fs').readFile;
 const writeFile = require('fs').writeFileSync;
 
+var userRouter = require("../routes/users");
+
 ////////////////////////////////////// MONGOOSE CONNECTION /////////////////////////////////////////////
 // Set up mongoose connection
 var mongoose = require('mongoose');
@@ -31,6 +33,7 @@ db.on('connected', function(){
 app.use(express.static(path.join(__dirname, 'client/build')));
 app.use(bodyParser.json());
 app.use(cors());
+app.use('/user', userRouter);
 ////////////////////////////// MONGOOSE VARS //////////////////////////////////////////////////////////
 
 var walkets = require('./../public/Models/WalKet');

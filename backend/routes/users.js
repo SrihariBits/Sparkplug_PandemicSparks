@@ -1,9 +1,15 @@
 var express = require('express');
 var router = express.Router();
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
-});
+var customerController = require("../controllers/customerController");
+var associateController = require("../controllers/associateController");
+
+router.get('/customer', customerController.customer_create_get);
+
+router.post('/customer', customerController.customer_create_post);
+
+router.get('/associate', associateController.associate_create_get);
+
+router.post('/associate', associateController.associate_create_post);
 
 module.exports = router;
