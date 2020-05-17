@@ -120,7 +120,14 @@ app.post('/findPrimaryCluster',(req,res) => {
         }
     });
   })
+///////////////////////////////// SECONDARY CLUSTERING ////////////////////////////////////////////////
 
+ var hclustering = require("./../public/SecondaryClustering/HierarchicalClustering");
+ //var c = hclustering.hierarchicalCluster(colors, "manhattan", "complete",50);
+ //console.log(JSON.stringify(c));
+ app.get('/cluster',(req,res)=>{
+     //res.send(c);
+ })
 //////////////////////////////////////// CELL's ITEMS /////////////////////////////////////////////////
 
 let msg;
@@ -199,6 +206,15 @@ app.post('/items',(req,res) => {
                             case 'south': direction = 'west';pathtype = 'pathSW';break;
                             case 'east': direction = 'south';pathtype = 'pathNW';break;
                             case 'west': direction = 'north';pathtype = 'pathSE';break;
+                            default: pathtype = 'pathHZ';
+                        }
+                        break;
+                    case 'reverse':
+                        switch(direction){
+                            case 'north': direction = 'south';pathtype = 'pathVT';break;
+                            case 'south': direction = 'north';pathtype = 'pathVT';break;
+                            case 'east': direction = 'west';pathtype = 'pathHZ';break;
+                            case 'west': direction = 'east';pathtype = 'pathHZ';break;
                             default: pathtype = 'pathHZ';
                         }
                         break;
