@@ -6,7 +6,7 @@ class Cell:
     def __init__(self, coords, cst=1, items = []):
         self.coords = coords
         self.cost = {}
-        self.cost[0] = cst
+        self.cost[0] = 1
         self.items = items
     
     def updateCost(self, cost):

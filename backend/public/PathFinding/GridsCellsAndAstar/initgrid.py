@@ -1,7 +1,7 @@
 import json
 import pickle
 from ModCell import Cell
-
+import os
 def mapcoord(coord):
     newcoord = (int((coord['x']-50)/100),int((coord['y']-50)/100))
     return newcoord
@@ -34,7 +34,7 @@ for i in range(len(grid)):
     for j in range(len(grid[0])):
         print(grid[i][j].cost, end=" ")
     print("\n")
-
+os.remove("grid")
 pklfile = open("grid","ab")
 pickle.dump(grid,pklfile)
 pklfile.close()
