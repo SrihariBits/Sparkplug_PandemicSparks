@@ -45,20 +45,22 @@ def getPath(time, start, end, parents, grid):
 def updatePath(grid, time, path):
     cnttime = time
     penalty = 3
-    for node in path[::-1]:
+    # for node in path[::-1]:
+    for node in path:
         if cnttime in grid[node[0]][node[1]].cost.keys():
             grid[node[0]][node[1]].cost[cnttime] += penalty
         else:
             grid[node[0]][node[1]].cost[cnttime] = grid[node[0]][node[1]].cost[0] + penalty
         # print(grid[node[0]][node[1]].cost)
         cnttime += 1
+    
 
 def astar(grid, time, start, end, dims):
     cost = []
     vis = []
     parents = []
     times = []
-    print(start,":::::::::::",end)
+    # print(start,":::::::::::",end)
     for i in range(dims[0]):
         tmp = []
         for j in range(dims[1]):
@@ -73,11 +75,11 @@ def astar(grid, time, start, end, dims):
     else:
         cost[start[0]][start[1]] = int(grid[start[0]][start[1]].cost[0])
 
-    print("!!!!!!!!!!!!!!!!!")
-    print(start)
-    print(grid[start[0]][start[1]].cost)
-    print("!!!!!!!!!!!!!!!!!")
-    print("\n")
+    # print("!!!!!!!!!!!!!!!!!")
+    # print(start)
+    # print(grid[start[0]][start[1]].cost)
+    # print("!!!!!!!!!!!!!!!!!")
+    # print("\n")
     
     costlist = SortedList()
     costlist.add((cost[start[0]][start[1]], start))
@@ -86,11 +88,11 @@ def astar(grid, time, start, end, dims):
     flag = 0
     while(True):
         node = costlist[0][1]
-        print("!!!!!!!!!!!!!!!!!")
-        print(node)
-        print(grid[node[0]][node[1]].cost)
-        print("!!!!!!!!!!!!!!!!!")
-        print("\n")
+        # print("!!!!!!!!!!!!!!!!!")
+        # print(node)
+        # print(grid[node[0]][node[1]].cost)
+        # print("!!!!!!!!!!!!!!!!!")
+        # print("\n")
         costlist.discard(costlist[0])
         if vis[node[0]][node[1]]==1:
             continue
@@ -106,9 +108,12 @@ def astar(grid, time, start, end, dims):
 
             newtime = times[node[0]][node[1]] + 1
             if newtime in grid[coord[0]][coord[1]].cost.keys():
+                print(newtime, "::", coord)
+                print("lala: ",grid[coord[0]][coord[1]].cost)
                 g = int(cost[node[0]][node[1]]) + int(grid[coord[0]][coord[1]].cost[newtime])
             else:
                 g = int(cost[node[0]][node[1]]) + int(grid[coord[0]][coord[1]].cost[0])
+            
             h = heuristic(coord[0], coord[1], end)
             cost[coord[0]][coord[1]] = min(g,cost[coord[0]][coord[1]])
             g = cost[coord[0]][coord[1]]
@@ -219,10 +224,10 @@ def findshortestpath(time, start, end, nodes):
     grid = pickle.load(unpklfile)
     dims = (len(grid), len(grid[0]))
     unpklfile.close()
-    for i in range(29,30):
-        for j in range(len(grid[0])):
-            print(grid[i][j].cost, end=" ")
-        print("\n")
+    # for i in range(29,30):
+    #     for j in range(len(grid[0])):
+    #         print(grid[i][j].cost, end=" ")
+    #     print("\n")
     paths = []
     
     start = mapcoord(start)
@@ -231,15 +236,17 @@ def findshortestpath(time, start, end, nodes):
         nodes[i]=mapcoord(nodes[i])
     tmp = start
 
+    starttime=time
+
     while nodes!=[]:
         short = SortedList()
         # for ele in short:
         #     print(ele)
         for node in nodes:
-            print("!!!!!!!!!!!!!!!!!")
-            print(node)
-            print(grid[node[0]][node[1]].cost)
-            print("!!!!!!!!!!!!!!!!!")
+            # print("!!!!!!!!!!!!!!!!!")
+            # print(node)
+            # print(grid[node[0]][node[1]].cost)
+            # print("!!!!!!!!!!!!!!!!!")
             print("\n")
             # print(astar(grid, tmp, node, dims))
             short.add(astar(grid, time, tmp, node, dims))
@@ -249,8 +256,7 @@ def findshortestpath(time, start, end, nodes):
 
 
 
-        updatePath(grid, time, short[0][1])
-
+        # updatePath(grid, time, short[0][1])
         for node in short[0][1]:
             print(node)
             print("node: ",grid[node[0]][node[1]].cost)
@@ -264,14 +270,18 @@ def findshortestpath(time, start, end, nodes):
         tmp = short[0][1][-2]
         paths[-1].pop(-1)
     
+    for path in paths:
+        updatePath(grid, starttime, path)
+        starttime+=len(path)
+    
     # print("paths: ",paths)
     retpath = astar(grid, time, tmp, end, dims)
     retpath[1].reverse()
     paths.append(retpath[1])
-    for i in range(29,30):
-        for j in range(len(grid[0])):
-            print(grid[i][j].cost, end=" ")
-        print("\n")
+    # for i in range(29,30):
+    #     for j in range(len(grid[0])):
+    #         print(grid[i][j].cost, end=" ")
+    #     print("\n")
 
     os.remove("grid")
     pklfile = open("grid","ab")
