@@ -1,10 +1,10 @@
-var Customer = require("../public/Models/Customer.js")
+var Customer = require("../public/Models/Customer.js");
 
-var async = require("async")
+var async = require("async");
 
 exports.customer_create_get = function(req, res) {
     
-    console.log('Cusotomer GET: Fetching all customers');
+    console.log('Customer GET: Fetching all customers');
 
     async.parallel({
         'customer': function(callback) {
@@ -76,7 +76,7 @@ exports.customer_create_post = function(req, res) {
                 res_data['status'] = "success";
                 res_data['message'] = "Customer POST: Customer added successfully";
                 console.log("Customer POST: Customer added successfully");
-                res.json(res_data);
+                return res.json(res_data);
             }
         })
         

@@ -11,6 +11,7 @@ const readFile = require('fs').readFile;
 const writeFile = require('fs').writeFileSync;
 
 var userRouter = require("../routes/users");
+var productRouter = require("../routes/products");
 
 ////////////////////////////////////// MONGOOSE CONNECTION /////////////////////////////////////////////
 // Set up mongoose connection
@@ -34,6 +35,7 @@ app.use(express.static(path.join(__dirname, 'client/build')));
 app.use(bodyParser.json());
 app.use(cors());
 app.use('/user', userRouter);
+app.use('/products', productRouter);
 ////////////////////////////// MONGOOSE VARS //////////////////////////////////////////////////////////
 
 var walkets = require('./../public/Models/WalKet');
