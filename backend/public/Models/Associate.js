@@ -23,6 +23,10 @@ var AssociateSchema = new Schema({
         max: [50, "Please use less than 50 words"],
         required: true,
     },
+    is_admin: {
+        type: Boolean,
+        default: false,
+    }
 });
 
 AssociateSchema

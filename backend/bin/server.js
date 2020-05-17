@@ -11,11 +11,12 @@ const readFile = require('fs').readFile;
 const writeFile = require('fs').writeFileSync;
 
 var userRouter = require("../routes/users");
+var productRouter = require("../routes/products");
 
 ////////////////////////////////////// MONGOOSE CONNECTION /////////////////////////////////////////////
 // Set up mongoose connection
 var mongoose = require('mongoose');
-var mongoDB = "mongodb+srv://daksh:daksh@cluster0-rzpnp.mongodb.net/walmartsparkplug?retryWrites=true&w=majority";
+var mongoDB = "";
 mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true });
 mongoose.Promise = global.Promise;
 var db = mongoose.connection;
@@ -34,6 +35,7 @@ app.use(express.static(path.join(__dirname, 'client/build')));
 app.use(bodyParser.json());
 app.use(cors());
 app.use('/user', userRouter);
+app.use('/products', productRouter);
 ////////////////////////////// MONGOOSE VARS //////////////////////////////////////////////////////////
 
 var walkets = require('./../public/Models/WalKet');
