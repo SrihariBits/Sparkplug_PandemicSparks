@@ -37,6 +37,7 @@ var walkets = require('./../public/Models/WalKet');
 var items = require('./../public/Models/Items');
 
 //////////////////////////////////// WALKET ORDERS/////////////////////////////////////////////////////
+
 let message=new walkets({
     ShipToAddress:{
         address:{
@@ -82,17 +83,40 @@ walkets.findOne({orderNo:message.orderNo},function(err,data){
         message.save();
     }
 });
+
 ///////////////////////////////////////////// PRIMARY CLUSTERING /////////////////////////////////////////////////
 
 var Mapper = new Map();
-readFile('./products/others/Mapper.csv', 'utf-8', (err, fileContent) => {
-    if(err) {
-        console.log(err);
-        throw new Error(err);
-    }
-    jsonObj = csvjson.toObject(fileContent);
-    jsonObj.forEach((item)=>Mapper.set(item.hash,item.assignment));
-});
+if(Mapper.size===0)
+{
+    readFile('./products/others/Mapper.csv', 'utf-8', (err, fileContent) => {
+        if(err) {
+            console.log(err);
+            throw new Error(err);
+        }
+        jsonObj = csvjson.toObject(fileContent);
+        jsonObj.forEach((item)=>Mapper.set(item.hash,item.assignment));
+    });
+}
+app.post('/findPrimaryCluster',(req,res) => {
+    items.findOne({'items.products':{$elemMatch: {productId:req.body.productId}}},function(err,data){
+        if(err) {
+            console.log(err);
+            throw new Error(err);
+        }
+        else if(data===null){
+            res.json({    
+                present:false
+            });
+        }
+        else{
+            res.json({
+                cluster:Mapper.get(data.Id),
+                present:true
+            });
+        }
+    });
+  })
 
 //////////////////////////////////////// CELL's ITEMS /////////////////////////////////////////////////
 
@@ -109,7 +133,11 @@ app.post('/items',(req,res) => {
         console.log(msg);
     });
     items.findOne({Id:req.body.Id},function(err,data){
-        if(data===null){
+        if(err) {
+            console.log(err);
+            throw new Error(err);
+        }
+        else if(data===null){
             msg.save();
             res.json({    
                 present:false,
