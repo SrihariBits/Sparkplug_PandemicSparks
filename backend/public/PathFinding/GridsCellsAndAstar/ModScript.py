@@ -46,13 +46,19 @@ def updatePath(grid, time, path):
     cnttime = time
     penalty = 3
     # for node in path[::-1]:
+    print("!!!!!!!!!!!")
     for node in path:
+        print(node, end=' ')
         if cnttime in grid[node[0]][node[1]].cost.keys():
-            grid[node[0]][node[1]].cost[cnttime] += penalty
+            grid[node[0]][node[1]].cost[cnttime] = grid[node[0]][node[1]].cost[cnttime] + penalty
         else:
             grid[node[0]][node[1]].cost[cnttime] = grid[node[0]][node[1]].cost[0] + penalty
         # print(grid[node[0]][node[1]].cost)
+        print(grid[node[0]][node[1]].cost[cnttime])
         cnttime += 1
+    
+    print("!!!!!!!!!!!")
+    return grid
     
 
 def astar(grid, time, start, end, dims):
@@ -60,7 +66,7 @@ def astar(grid, time, start, end, dims):
     vis = []
     parents = []
     times = []
-    # print(start,":::::::::::",end)
+    print(start,":::::::::::",end)
     for i in range(dims[0]):
         tmp = []
         for j in range(dims[1]):
@@ -88,6 +94,10 @@ def astar(grid, time, start, end, dims):
     flag = 0
     while(True):
         node = costlist[0][1]
+        # print("node: ",node)
+        # for item in costlist:
+        #     print(item, end=' ')
+        # print("\n")
         # print("!!!!!!!!!!!!!!!!!")
         # print(node)
         # print(grid[node[0]][node[1]].cost)
@@ -98,6 +108,7 @@ def astar(grid, time, start, end, dims):
             continue
         vis[node[0]][node[1]] = 1
         adj = getValid(node, dims)
+        # print("adj: ",adj)
         flag = 0
         # parents[node[0]][node[1]] = tmpnode
         times[node[0]][node[1]] = times[tmpnode[0]][tmpnode[1]]+1
@@ -106,18 +117,20 @@ def astar(grid, time, start, end, dims):
             if vis[coord[0]][coord[1]]==1:
                 continue
 
+            # print(coord)
             newtime = times[node[0]][node[1]] + 1
             if newtime in grid[coord[0]][coord[1]].cost.keys():
-                print(newtime, "::", coord)
-                print("lala: ",grid[coord[0]][coord[1]].cost)
-                g = int(cost[node[0]][node[1]]) + int(grid[coord[0]][coord[1]].cost[newtime])
+                # print(newtime, "::", coord)
+                # print("lala: ",grid[coord[0]][coord[1]].cost)
+                g = (cost[node[0]][node[1]]) + (grid[coord[0]][coord[1]].cost[newtime])
             else:
-                g = int(cost[node[0]][node[1]]) + int(grid[coord[0]][coord[1]].cost[0])
+                g = (cost[node[0]][node[1]]) + (grid[coord[0]][coord[1]].cost[0])
             
             h = heuristic(coord[0], coord[1], end)
             cost[coord[0]][coord[1]] = min(g,cost[coord[0]][coord[1]])
             g = cost[coord[0]][coord[1]]
             # cost[coord[0]][coord[1]] = g
+            # print(g, ", ", h)
             costlist.add((g+h,coord))
             
             parents[coord[0]][coord[1]] = node
@@ -247,7 +260,7 @@ def findshortestpath(time, start, end, nodes):
             # print(node)
             # print(grid[node[0]][node[1]].cost)
             # print("!!!!!!!!!!!!!!!!!")
-            print("\n")
+            # print("\n")
             # print(astar(grid, tmp, node, dims))
             short.add(astar(grid, time, tmp, node, dims))
         # print(short)
@@ -257,10 +270,10 @@ def findshortestpath(time, start, end, nodes):
 
 
         # updatePath(grid, time, short[0][1])
-        for node in short[0][1]:
-            print(node)
-            print("node: ",grid[node[0]][node[1]].cost)
-            print("\n")
+        # for node in short[0][1]:
+        #     print(node)
+        #     print("node: ",grid[node[0]][node[1]].cost)
+        #     print("\n")
 
         short[0][1].reverse()
         paths.append(short[0][1])
@@ -271,7 +284,7 @@ def findshortestpath(time, start, end, nodes):
         paths[-1].pop(-1)
     
     for path in paths:
-        updatePath(grid, starttime, path)
+        grid = updatePath(grid, starttime, path)
         starttime+=len(path)
     
     # print("paths: ",paths)
@@ -300,7 +313,7 @@ start = (50,50)
 end = (2950,1950)
 #add the commented lines to debug
 # nodes = [(150,150), (450,250), (250,450), (450,450)]
-nodes = [(450,1550)]
+nodes = [(450,1550),(2950,1850)]
 path1 = findshortestpath(5, start, end, nodes)
 print("\n\n\n\n")
 print(path1)
