@@ -12,4 +12,6 @@ router.get('/order', orderController.order_create_get);
 
 router.post('/order', orderController.order_create_post);
 
+router.get('/order/:username', orderController.customer_order_get);
+
 module.exports = router;
