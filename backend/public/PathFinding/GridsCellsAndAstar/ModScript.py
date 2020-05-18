@@ -231,7 +231,7 @@ def directions(paths):
     return dirarr           
 
 
-def findshortestpath(time, start, end, nodes):
+def findshortestpath(time, start, end, nodeslist):
     
     unpklfile = open("grid","rb")
     grid = pickle.load(unpklfile)
@@ -243,6 +243,19 @@ def findshortestpath(time, start, end, nodes):
     #     print("\n")
     paths = []
     
+    nodesdict = {}
+    nodes = []
+    for node in nodeslist:
+        nodes.append((node[0],node[1]))
+        tup = (node[0],node[1])
+        tmptup = (node[2],node[3])
+        if tup in nodesdict.keys():
+            nodesdict[tup].append(tmptup)
+        else:
+            nodesdict[tup] = []
+            nodesdict[tup].append(tmptup)
+
+
     start = mapcoord(start)
     end = mapcoord(end)
     for i in range(len(nodes)):
@@ -251,21 +264,21 @@ def findshortestpath(time, start, end, nodes):
 
     starttime=time
 
+    shortestnodes = []
+
     while nodes!=[]:
         short = SortedList()
         # for ele in short:
         #     print(ele)
         for node in nodes:
-            # print("!!!!!!!!!!!!!!!!!")
-            # print(node)
-            # print(grid[node[0]][node[1]].cost)
-            # print("!!!!!!!!!!!!!!!!!")
             # print("\n")
             # print(astar(grid, tmp, node, dims))
             short.add(astar(grid, time, tmp, node, dims))
+        
         # print(short)
-        # for ele in short:
-        #     print(ele)
+        for ele in short:
+            print(ele)
+
 
 
 
@@ -309,26 +322,11 @@ def findshortestpath(time, start, end, nodes):
     return paths
 
 
-start = (50,50)
-end = (2950,1950)
-#add the commented lines to debug
-# nodes = [(150,150), (450,250), (250,450), (450,450)]
-nodes = [(450,1550),(2950,1850)]
-path1 = findshortestpath(5, start, end, nodes)
-print("\n\n\n\n")
-print(path1)
-# print("**********")
-# nodes = [(1,1), (4,2), (2,4), (4,4)]
-# print(findshortestpath(0, (1,3), (4,3), nodes))
 
-
-# for m in range(dims[0]):
-#     print(m)
-#     for n in range(dims[1]):
-#         print(n," : ",grid[m][n].cost)
-# print(astar(grid, 0, start, end, dims))
-# for m in range(dims[0]):
-#     print(m)
-#     for n in range(dims[1]):
-#         print(n," : ",grid[m][n].cost)
-
+#uncomment the following to test run
+# start = (50,50)
+# end = (2950,1950)
+# nodes = [[450,1550,'abc','khkjdh'],[250,1850,'def','jhkj'],[350,950,'ghi','wuey'], [350,950,'jkl','9487'], [350,950,'mno','849ie']]
+# path1 = findshortestpath(5, start, end, nodes)
+# print("\n\n\n\n")
+# print(path1)
