@@ -22,6 +22,34 @@ class CustomerPage extends Component{
             currentOrder: {
                 "itemset": [],
                 "customerID": localStorage.getItem("username"),
+            },
+            walketOrder: {
+                "ShipToAddress": {
+                    "address": {
+                        "addressLineTwo": "chennai, TN",
+                        "countryCode": "TN",
+                        "addressType": "Residential",
+                        "postalCode": "600020",
+                        "addressLineOne": "1/23 Adyar"
+                    },
+                    "phone": {
+                        "completeNumber": "1234567899"
+                    },
+                    "name": {
+                        "firstName": "John",
+                        "lastName": "Doe",
+                        "completeName": "John Doe"
+                    }
+                },
+                "orderTotals": {
+                    "grandTotal": {
+                        "currencyAmount": "100",
+                        "currencyUnit": "USD"
+                    }
+                },
+                "orderNo": "1a2b3c4d",
+                "products": [],
+                "event_time": ""
             }
         };
         this.textInput = React.createRef();
@@ -62,6 +90,19 @@ class CustomerPage extends Component{
             .push({"product": this.state.productList[event.target.value]["_id"],
                    "productName": this.state.productList[event.target.value]["description"],
                    "count": localStorage.getItem("quantity")});
+
+        let walketOrder = this.state.walketOrder;
+        walketOrder["products"]
+            .push({
+                "productID": this.state.productList[event.target.value]["_id"],
+                "description": this.state.productList[event.target.value]["description"],
+                "unitPrice": {
+                    "currencyAmount": String(this.state.productList[event.target.value]["unitPrice"]),
+                    "currencyUnit": this.state.productList[event.target.value]["currencyUnit"]
+                },
+                "orderQuantity": localStorage.getItem("quantity")
+            });
+
         console.log(currentOrder);
     }
 
@@ -69,6 +110,15 @@ class CustomerPage extends Component{
         let finalOrder = this.state.currentOrder;
         finalOrder["customerID"] = this.state.userid;
         axios.post('http://127.0.0.1:5000/products/order', finalOrder)
+            .then(res => {
+                console.log(res.data);
+            });
+
+        let walketOrder = this.state.walketOrder;
+        walketOrder["event_time"] = new Date();
+        console.log(walketOrder);
+
+        axios.post('http://127.0.0.1:5000/products/walket', walketOrder)
             .then(res => {
                 console.log(res.data);
             });
