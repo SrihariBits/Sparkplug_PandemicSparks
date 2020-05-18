@@ -4,7 +4,11 @@ import {Navbar,
         Nav,
         Card,
         Accordion,
-        Button
+        Button,
+        FormControl,
+        FormLabel,
+        Row,
+        Col
     } from "react-bootstrap";
 import {withRouter} from "react-router-dom";
 import axios from "axios";
@@ -14,8 +18,13 @@ class CustomerPage extends Component{
         super(props);
         this.state = {
             cart: true,
-            order: false
+            order: false,
+            currentOrder: {
+                "itemset": [],
+                "customerID": localStorage.getItem("username"),
+            }
         };
+        this.textInput = React.createRef();
     }
 
     componentWillMount() {
@@ -25,6 +34,32 @@ class CustomerPage extends Component{
             this.setState({productList: productList});
             console.log(this.state.productList);
         })
+    }
+
+    onChange = (event) => {
+        const value = event.target.value;
+        localStorage.setItem("quantity", value);
+    }
+
+    handleClick = (event) => {
+        let currentOrder = this.state.currentOrder;
+        currentOrder["itemset"]
+            .push({"product": this.state.productList[event.target.value]["_id"],
+                   "count": localStorage.getItem("quantity")});
+        console.log(currentOrder);
+    }
+
+    handleFinish = () => {
+        let finalOrder = this.state.currentOrder;
+        axios.post('http://127.0.0.1:5000/products/order', finalOrder)
+            .then(res => {
+                console.log(res.data);
+            });
+        this.setState({currentOrder: {
+            "itemset": [],
+            "customerID": localStorage.getItem("username"),
+            }
+        });
     }
 
     productListLayout = () => {
@@ -44,6 +79,11 @@ class CustomerPage extends Component{
                             Product Description: {this.state.productList[i]["description"]}
                             <br />
                             Price: {this.state.productList[i]["unitPrice"] + ' ' + this.state.productList[i]["currencyUnit"]}
+                            <br />
+                            <FormLabel>Quantity</FormLabel>
+                            <FormControl ref={this.textInput} type="text" onChange={this.onChange} />
+                            <br />
+                            <Button variant="primary" value={i} onClick={this.handleClick}>Add</Button>
                         </Card.Body>
                     </Accordion.Collapse>
                 </Card>
@@ -89,7 +129,16 @@ class CustomerPage extends Component{
         return (
             <Card>
                 <Card.Body>
-                    <Card.Title>Place Order</Card.Title>
+                    <Card.Title>
+                        <Row>
+                            <Col md={11}>
+                                Place Order
+                            </Col>
+                            <Col md={1}>
+                                <Button variant="primary" onClick={this.handleFinish}>Finish</Button>
+                            </Col>
+                        </Row>
+                    </Card.Title>
                     <Accordion>
                         {this.productListLayout()}
                     </Accordion>
