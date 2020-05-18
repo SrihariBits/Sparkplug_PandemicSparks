@@ -2,6 +2,28 @@ var Customer = require("../public/Models/Customer.js");
 
 var async = require("async");
 
+exports.customer_get_userid = function(req, res) {
+
+    console.log("Customer GET: Fetching id for username " + req.params.username);
+
+   async.parallel({
+       'customer': function(callback) {
+           Customer.findOne({"username": req.params.username})
+           .exec(callback);
+       },
+   }, function(err, result) {
+        if(err){
+            console.log(err);
+            return res.jaon({
+                'status': 'failure',
+                'message': 'Customer GET ID: some error occured',
+            })
+        }
+
+        return res.json(result.customer);
+   });
+}
+
 exports.customer_create_get = function(req, res) {
     
     console.log('Customer GET: Fetching all customers');
