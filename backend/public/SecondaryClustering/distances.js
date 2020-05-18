@@ -19,7 +19,7 @@ module.exports = {
      },
      manhattan: function(v1, v2) {
        var total = 0;
-       for (var i = 0; i < v1.length ; i++) {
+       for (var i = 0; i < v1.length-1 ; i++) {
           total += Math.abs(v2[i] - v1[i]);
        }
        return total;

@@ -29,7 +29,7 @@ HierarchicalClustering.prototype = {
       for (var i = 0; i < this.clusters.length; i++) {
          for (var j = 0; j <= i; j++) {
             var dist = (i == j) ? Infinity :
-               this.distance(this.clusters[i].value, this.clusters[j].value);
+               this.distance(this.clusters[i].value, this.clusters[j].value);//here
             this.dists[i][j] = dist;
             this.dists[j][i] = dist;
 

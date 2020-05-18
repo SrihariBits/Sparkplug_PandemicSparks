@@ -13,6 +13,14 @@ const writeFile = require('fs').writeFileSync;
 var userRouter = require("../routes/users");
 var productRouter = require("../routes/products");
 
+//////////////////////////////////// LSH CONFIG ///////////////////////////////////////////////////////
+const Lsh = require('./../public/lsh/src/index');
+const config = {
+    storage: 'memory',
+    shingleSize: 2,
+    numberOfHashFunctions: 120
+  }
+
 ////////////////////////////////////// MONGOOSE CONNECTION /////////////////////////////////////////////
 // Set up mongoose connection
 var mongoose = require('mongoose');
@@ -40,6 +48,7 @@ app.use('/products', productRouter);
 
 var walkets = require('./../public/Models/WalKet');
 var items = require('./../public/Models/Items');
+var batches = require('./../public/Models/Batches');
 
 //////////////////////////////////// WALKET ORDERS/////////////////////////////////////////////////////
 
@@ -67,13 +76,13 @@ let message=new walkets({
             currencyUnit:"USD"
         }
     },
-    orderNo:"1a2b3d",
+    orderNo:"1a2b3c",
     products:[
         {
-            productId:"PR38KAC10",
-            description:"Frozen II Blue Ray",
+            productId:"PR89GGT53",
+            description:"Mac and Cheese",
             unitPrice:{
-                currencyAmount:"24.96",
+                currencyAmount:"9.01",
                 currencyUnit:"USD"
             },
             orderQuantity:"2"
@@ -128,9 +137,13 @@ app.post('/findPrimaryCluster',(req,res) => {
 
 var numberToReceive = 10;
 var currentOrders = [];
-var clustersPresent = new Set();
+var itemToClusters = new Map();
+var distanceVector = [];
 var avgDistance = new Map();
 var hclusterInput = [];
+var orderIDs = new Set();
+var hclustering = require("./../public/SecondaryClustering/HierarchicalClustering");
+const lsh = Lsh.getInstance(config);
 walkets
   .find({orderNo:{ $ne: null }})
   .sort({'event_time': 1})
@@ -139,6 +152,7 @@ walkets
     posts.forEach((order)=>{
         currentOrders.push(order);
         order.products.map((item)=>{
+            console.log(item);
             items
                 .findOne({'products':{$elemMatch: {productId:item.productId}}},function(err,data){
                     if(err) {
@@ -147,25 +161,20 @@ walkets
                     }
                     else if(data===null)
                     {
-                        console.log("item with ProductId"+item.productId+"is currently not available in store");
+                        console.log("item with ProductId "+item.productId+"is currently not available in store");
                     }
                     else{
                         var temp = Mapper.get(data.Id);
-                        clustersPresent.add(temp);
-                        //console.log(clustersPresent);
+                        itemToClusters.set(item.productId,temp);
                         if(!avgDistance.has(temp))
                         {
                             //console.log(data);
-                            avgDistance.set(temp,[parseInt(data.x),parseInt(data.y),1]);
-                            console.log(avgDistance.get(temp));
+                            avgDistance.set(temp,[parseInt(data.x),parseInt(data.y),1,temp]);
+                            distanceVector.push([parseInt(data.x),parseInt(data.y)]);
                         }
                         else{
-                            var a = avgDistance.get(temp)[0];
-                            avgDistance.set(temp,a+parseInt(data.x));
-                            var b = avgDistance.get(temp)[1];
-                            avgDistance.set(temp,b+parseInt(data.y));
-                            var d = avgDistance.get(temp)[2];
-                            avgDistance.set(temp,d+1);
+                            var a = avgDistance.get(temp);
+                            avgDistance.set(temp,[a[0]+parseInt(data.x),a[1]+parseInt(data.y),a[2]+1,a[3]]);
                         }
                     }
                 })
@@ -174,25 +183,97 @@ walkets
 
     setTimeout(()=>{
         avgDistance.forEach((tuple)=>{
-              hclusterInput.push([tuple[0]/tuple[2],tuple[1]/tuple[2]]);
+              hclusterInput.push([tuple[0]/tuple[2],tuple[1]/tuple[2],tuple[3]]);
           });
-          console.log(avgDistance);
-        },150);
+          var maxDistance = 0;
+          distanceVector.map((tuple1)=>{
+              distanceVector.map((tuple2)=>{
+                maxDistance=Math.max(maxDistance,Math.abs(tuple1[0]-tuple2[0])+Math.abs(tuple1[1]-tuple2[1]));
+              })
+          })
+          console.log(maxDistance);
+          if(maxDistance>2500)
+          {
+            var secClusterMap = {};
+            var c = hclustering.hierarchicalCluster(hclusterInput, "manhattan", "complete",5000);
+            app.get('/cluster',(req,res)=>{res.send(c);})
+            console.log(c);
+            var cnt=0;
+            c.forEach((primary)=>{
+                ++cnt;
+                function inOrderHelper(root) {
+                    if (root.hasOwnProperty("value")) {
+                       secClusterMap[root.value[2]]='C'+cnt;
+                       return;
+                    }
+                    inOrderHelper(root.left);
+                    if (root.hasOwnProperty("right"))
+                        inOrderHelper(root.right);
+                }
+                inOrderHelper(primary);
+            });
+            currentOrders.forEach((order,index)=>{
+                var LSHinput = "";
+                orderIDs.add(order.orderNo);
+                order.products.forEach((item)=>{
+                    LSHinput=LSHinput+secClusterMap[itemToClusters.get(item.productId)];
+                })
+                console.log(LSHinput);
+                lsh.addDocument(index, LSHinput);
+            })
+          }
+          else
+          {
+            currentOrders.forEach((order,index)=>{
+                var LSHinput = "";
+                orderIDs.add(order.orderNo);
+                order.products.forEach((item)=>{
+                    LSHinput=LSHinput+itemToClusters.get(item.productId);
+                })
+                console.log(LSHinput);
+                lsh.addDocument(index, LSHinput);
+            })
+          }
+          console.log(orderIDs);
+          var msg = new batches({
+              batchId:'123',
+              status:'pending',
+              orders:[{orderId:"1a2b3d"}],
+              event_time:new Date()
+          });
+          //msg.save();
+          /*while(orderIDs.size>0)
+          {
+              if(orderIDs.size<=3)
+              {
+                batches.findOne({batchId:'123'},function(err,data){
+                    if(data===null)
+                    {
+                        var msg = new batches();
+                        orderIDs.forEach((order)=>{
+                            msg.orders.push(order.Id);
+                        })
+                        msg.event_time = new Date();
+                        msg.batchId = '123';
+                        msg.save();
+                    }
+                });
+                  
+              }
+              /*const q = {
+                  id:0,
+                  bucketSize:4
+              }
+              //console.log(lsh.query(q));
+          }*/
+          const q = {
+            id:1,
+            bucketSize:4
+            }
+          console.log("uff"+lsh.query(q));
+        },2000);
   });
 
-
-
- 
-///////////////////////////////// SECONDARY CLUSTERING ////////////////////////////////////////////////
-
-var hclustering = require("./../public/SecondaryClustering/HierarchicalClustering");
-setTimeout(()=>{
-    var c = hclustering.hierarchicalCluster([hclusterInput], "manhattan", "complete",50);
-    console.log(JSON.stringify(c));
-    app.get('/cluster',(req,res)=>{
-        res.send(c);
-    })
-},2000);
 
 //////////////////////////////////////// CELL's ITEMS /////////////////////////////////////////////////
 
