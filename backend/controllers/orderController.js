@@ -1,6 +1,58 @@
 var Order = require("../public/Models/Order.js");
+var Customer = require("../public/Models/Customer.js");
+var Product = require("../public/Models/Product.js")
 
 var async = require("async");
+
+exports.customer_order_get = function(req, res) {
+
+    console.log('Customer Order GET: Fetching products belonging to customer ' + req.params.username);
+
+    var customerid = "";
+
+    async.parallel({
+        'customer': function(callback) {
+            Customer.findOne({'username': req.params.username})
+            .exec(callback);
+        },
+    }, function(err, result) {
+        if(err) {
+            console.log(err);
+            return res.json({
+                'status': 'failure',
+                'message': 'Customer order GET: some error occured'
+            })
+        }
+
+        if(result.customer == null) {
+            return res.json({'status': 'failure'});    
+        }
+
+        customerid = result.customer._id;
+
+        async.parallel({
+            'orders': function(callback) {
+                Order.find({"customerID": customerid})
+                .exec(callback);
+            },
+        }, function(err, orderresult) {
+            if(err) {
+                console.log(err);
+                return res.json({
+                    'status': 'failure',
+                    'message': 'Customer order GET: some error occured'
+                })
+            }
+
+            var res_data = []
+            for (x in orderresult.orders){
+                res_data.push(orderresult.orders[x]);
+            }
+
+            return res.json(res_data);
+        });
+    });
+}
 
 exports.order_create_get = function(req, res) {
     

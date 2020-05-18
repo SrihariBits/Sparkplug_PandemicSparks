@@ -8,6 +8,8 @@ router.get('/customer', customerController.customer_create_get);
 
 router.post('/customer', customerController.customer_create_post);
 
+router.get('/customer/:username', customerController.customer_get_userid);
+
 router.get('/associate', associateController.associate_create_get);
 
 router.post('/associate', associateController.associate_create_post);
