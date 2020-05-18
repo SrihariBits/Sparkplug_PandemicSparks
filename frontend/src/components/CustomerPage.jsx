@@ -72,6 +72,7 @@ class CustomerPage extends Component{
             .then(res => {
                 console.log(res.data);
             });
+
         this.setState({currentOrder: {
             "itemset": [],
             "customerID": this.state.userid,
@@ -98,7 +99,7 @@ class CustomerPage extends Component{
                     </Card.Header>
                     <Accordion.Collapse eventKey={i}>
                         <Card.Body>
-                            Product ID: {this.state.productList[i]["_id"]}
+                            Product ID: {this.state.productList[i]["productID"]}
                             <br />
                             Product Description: {this.state.productList[i]["description"]}
                             <br />
