@@ -256,16 +256,13 @@ def findshortestpath(time, start, end, nodes):
         # for ele in short:
         #     print(ele)
         for node in nodes:
-            # print("!!!!!!!!!!!!!!!!!")
-            # print(node)
-            # print(grid[node[0]][node[1]].cost)
-            # print("!!!!!!!!!!!!!!!!!")
             # print("\n")
             # print(astar(grid, tmp, node, dims))
             short.add(astar(grid, time, tmp, node, dims))
+        
         # print(short)
-        # for ele in short:
-        #     print(ele)
+        for ele in short:
+            print(ele)
 
 
 
@@ -313,7 +310,7 @@ start = (50,50)
 end = (2950,1950)
 #add the commented lines to debug
 # nodes = [(150,150), (450,250), (250,450), (450,450)]
-nodes = [(450,1550),(2950,1850)]
+nodes = [(450,1550),(250,1850),(350,950), (350,950), (350,950)]
 path1 = findshortestpath(5, start, end, nodes)
 print("\n\n\n\n")
 print(path1)
