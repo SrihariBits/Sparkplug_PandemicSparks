@@ -139,7 +139,6 @@ walkets
     posts.forEach((order)=>{
         currentOrders.push(order);
         order.products.map((item)=>{
-            clustersPresent.add(Mapper.get(item.productId));
             items
                 .findOne({'products':{$elemMatch: {productId:item.productId}}},function(err,data){
                     if(err) {
@@ -148,13 +147,15 @@ walkets
                     }
                     else if(data===null)
                     {
-                        
+                        console.log("item with ProductId"+item.productId+"is currently not available in store");
                     }
                     else{
                         var temp = Mapper.get(data.Id);
+                        clustersPresent.add(temp);
+                        //console.log(clustersPresent);
                         if(!avgDistance.has(temp))
                         {
-                            console.log(data);
+                            //console.log(data);
                             avgDistance.set(temp,[parseInt(data.x),parseInt(data.y),1]);
                             console.log(avgDistance.get(temp));
                         }
@@ -167,24 +168,31 @@ walkets
                             avgDistance.set(temp,d+1);
                         }
                     }
-                });
+                })
         });
     });
-    avgDistance.forEach((tuple)=>{
-        hclusterInput.push([tuple[0]/tuple[2],tuple[1]/tuple[2]]);
-    });
-    console.log("hi"+hclusterInput);
+
+    setTimeout(()=>{
+        avgDistance.forEach((tuple)=>{
+              hclusterInput.push([tuple[0]/tuple[2],tuple[1]/tuple[2]]);
+          });
+          console.log(avgDistance);
+        },150);
   });
+
+
 
  
 ///////////////////////////////// SECONDARY CLUSTERING ////////////////////////////////////////////////
 
- var hclustering = require("./../public/SecondaryClustering/HierarchicalClustering");
- var c = hclustering.hierarchicalCluster(hclusterInput, "manhattan", "complete",50);
- console.log(JSON.stringify(c));
- app.get('/cluster',(req,res)=>{
-     res.send(c);
- })
+var hclustering = require("./../public/SecondaryClustering/HierarchicalClustering");
+setTimeout(()=>{
+    var c = hclustering.hierarchicalCluster([hclusterInput], "manhattan", "complete",50);
+    console.log(JSON.stringify(c));
+    app.get('/cluster',(req,res)=>{
+        res.send(c);
+    })
+},2000);
 
 //////////////////////////////////////// CELL's ITEMS /////////////////////////////////////////////////
 
@@ -334,6 +342,42 @@ app.get('/warehouseLoad',(req,res) => {
         res.send(JSON.stringify(fileContent));
     });  
 })
+
+////////////////////////////// UPDATING CELL COORDS IN DB ON CHANGE ///////////////////////////////////
+
+app.get('/updateCellCoords',(req,res) => {
+    readFile('./../frontend/files/warehouse.json', 'utf-8', (err, fileContent) => {
+        if(err) {
+            console.log(err);
+            throw new Error(err);
+        }
+    
+        var coords=[];
+        var dat = JSON.parse(fileContent);
+        for(const property in dat.layers)
+        {
+            for(const hash in dat.layers[property].items)
+            {
+                items.findOne({Id:dat.layers[property].items[hash].id},function(err,doc){
+                    //console.log("val:"+dat.layers[property].items[hash].id);
+                    if(doc===null)
+                    {
+                        console.log("No item : "+dat.layers[property].items[hash].id);
+                    }
+                    else{
+                        doc.x=(Math.floor((dat.layers[property].items[hash].x+1)/10)*10).toString();
+                        doc.y=(Math.floor((dat.layers[property].items[hash].y+1)/10)*10).toString();
+                        doc.save(function(err){
+                            console.log(err);
+                        });
+                    }
+                    
+                });
+            coords=[...coords,...[{x:dat.layers[property].items[hash].x,y:dat.layers[property].items[hash].y}]];
+            }
+        }
+    });
+});
 
 ////////////////////////////// PRINTING CELL COORDS INTO FILE /////////////////////////////////////////
 
