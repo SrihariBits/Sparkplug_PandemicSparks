@@ -1,24 +1,28 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {Route, Link, BrowserRouter as Router, Switch} from "react-router-dom";
-
+import "bootstrap/dist/css/bootstrap.min.css";
 import './index.css';
 import * as serviceWorker from './serviceWorker';
 
 import App from './App';
 import HomePage from './components/HomePage';
 import ErrorPage from './components/ErrorPage';
+import AdminPage from './components/AdminPage';
+import AssociatePage from './components/AssociatePage';
+import CustomerPage from './components/CustomerPage';
 
 const routing = (
-  <React.StrictMode>
     <Router>
       <Switch>
         <Route exact path="/" component={App} />
-        <Route exact path="/home" component={HomePage} />
+        <Route path="/home" component={HomePage} />
+        <Route path="/admin" component={AdminPage} />
+        <Route path="/associate" component={AssociatePage} />
+        <Route path="/customer" component={CustomerPage} />
         <Route component={ErrorPage} />
       </Switch>
     </Router>
-  </React.StrictMode>
 )
 
 ReactDOM.render(
