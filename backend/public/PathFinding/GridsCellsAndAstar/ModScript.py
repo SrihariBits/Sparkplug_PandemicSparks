@@ -231,7 +231,7 @@ def directions(paths):
     return dirarr           
 
 
-def findshortestpath(time, start, end, nodes):
+def findshortestpath(time, start, end, nodeslist):
     
     unpklfile = open("grid","rb")
     grid = pickle.load(unpklfile)
@@ -243,6 +243,18 @@ def findshortestpath(time, start, end, nodes):
     #     print("\n")
     paths = []
     
+    nodesdict = {}
+    nodes = []
+    for node in nodeslist:
+        nodes.append((node[0],node[1]))
+        tup = (node[0],node[1])
+        if tup in nodesdict.keys():
+            nodesdict[tup].append(node[2])
+        else:
+            nodesdict[tup] = []
+            nodesdict[tup].append(node[2])
+
+
     start = mapcoord(start)
     end = mapcoord(end)
     for i in range(len(nodes)):
@@ -250,6 +262,8 @@ def findshortestpath(time, start, end, nodes):
     tmp = start
 
     starttime=time
+
+    shortestnodes = []
 
     while nodes!=[]:
         short = SortedList()
@@ -263,6 +277,7 @@ def findshortestpath(time, start, end, nodes):
         # print(short)
         for ele in short:
             print(ele)
+
 
 
 
@@ -310,7 +325,7 @@ start = (50,50)
 end = (2950,1950)
 #add the commented lines to debug
 # nodes = [(150,150), (450,250), (250,450), (450,450)]
-nodes = [(450,1550),(250,1850),(350,950), (350,950), (350,950)]
+nodes = [[450,1550,'abc'],[250,1850,'def'],[350,950,'ghi'], [350,950,'jkl'], [350,950,'mno']]
 path1 = findshortestpath(5, start, end, nodes)
 print("\n\n\n\n")
 print(path1)
