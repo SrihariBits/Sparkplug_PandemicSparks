@@ -146,6 +146,10 @@ walkets
                         console.log(err);
                         throw new Error(err);
                     }
+                    else if(data===null)
+                    {
+                        
+                    }
                     else{
                         var temp = Mapper.get(data.Id);
                         if(!avgDistance.has(temp))
