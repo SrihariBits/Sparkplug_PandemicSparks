@@ -1,5 +1,6 @@
 var Order = require("../public/Models/Order.js");
 var Customer = require("../public/Models/Customer.js");
+var Product = require("../public/Models/Product.js")
 
 var async = require("async");
 
@@ -28,7 +29,6 @@ exports.customer_order_get = function(req, res) {
         }
 
         customerid = result.customer._id;
-        console.log(customerid);
 
         async.parallel({
             'orders': function(callback) {

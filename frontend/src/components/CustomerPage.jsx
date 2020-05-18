@@ -34,7 +34,22 @@ class CustomerPage extends Component{
             this.setState({productList: productList});
             console.log(this.state.productList);
         })
+
+        axios.get('http://127.0.0.1:5000/products/order/' + localStorage.getItem("username"))
+        .then(res => {
+            const cartList = res.data;
+            this.setState({cartList: cartList})
+            console.log(this.state.cartList);
+        })
+
+        axios.get('http://127.0.0.1:5000/user/customer/' + localStorage.getItem("username"))
+        .then(res => {
+            const userid = res.data["_id"];
+            this.setState({userid: userid});
+            console.log(this.state.userid);
+        })
     }
+
 
     onChange = (event) => {
         const value = event.target.value;
@@ -45,21 +60,30 @@ class CustomerPage extends Component{
         let currentOrder = this.state.currentOrder;
         currentOrder["itemset"]
             .push({"product": this.state.productList[event.target.value]["_id"],
+                   "productName": this.state.productList[event.target.value]["description"],
                    "count": localStorage.getItem("quantity")});
         console.log(currentOrder);
     }
 
     handleFinish = () => {
         let finalOrder = this.state.currentOrder;
+        finalOrder["customerID"] = this.state.userid;
         axios.post('http://127.0.0.1:5000/products/order', finalOrder)
             .then(res => {
                 console.log(res.data);
             });
         this.setState({currentOrder: {
             "itemset": [],
-            "customerID": localStorage.getItem("username"),
+            "customerID": this.state.userid,
             }
         });
+        
+        axios.get('http://127.0.0.1:5000/products/order/' + localStorage.getItem("username"))
+        .then(res => {
+            const cartList = res.data;
+            this.setState({cartList: cartList})
+            console.log(this.state.cartList);
+        })
     }
 
     productListLayout = () => {
@@ -92,33 +116,50 @@ class CustomerPage extends Component{
         return productList;
     }
 
+    individualProduct = (i) => {
+        let product = []
+        for(let j=0; j<this.state.cartList[i].itemset.length; j++){
+            product.push(
+                <b>
+                    Product: {this.state.cartList[i].itemset[j].productName}
+                    <br />
+                    Quantity: {this.state.cartList[i].itemset[j].count}
+                    <br />
+                    <br />
+                </b>
+            )
+        }
+        return product;
+    }
+
+    cartListLayout = () => {
+        let cartList = []
+        for(let i=0; i<this.state.cartList.length; i++){
+            cartList.push(
+                <Card>
+                    <Card.Header>
+                        <Accordion.Toggle as={Button} variant="primary" eventKey={i}>
+                            {"Order " + String(i)}
+                        </Accordion.Toggle>
+                    </Card.Header>
+                    <Accordion.Collapse eventKey={i}>
+                        <Card.Body>
+                            {this.individualProduct(i)}
+                        </Card.Body>
+                    </Accordion.Collapse>
+                </Card>
+            )
+        }
+        return cartList;
+    }
+
     cartLayout = () => {
         return (
             <Card>
                 <Card.Body>
                     <Card.Title>Your Cart</Card.Title>
-                      
                     <Accordion>
-                        <Card>
-                            <Card.Header>
-                                <Accordion.Toggle as={Button} variant="primary" eventKey={0}>
-                                    French Fries
-                                </Accordion.Toggle>
-                            </Card.Header>
-                            <Accordion.Collapse eventKey={0}>
-                                <Card.Body>Quantity: 3</Card.Body>
-                            </Accordion.Collapse>
-                        </Card>
-                        <Card>
-                            <Card.Header>
-                                <Accordion.Toggle as={Button} variant="primary" eventKey={1}>
-                                    Butter Garlic Fries
-                                </Accordion.Toggle>
-                            </Card.Header>
-                            <Accordion.Collapse eventKey={1}>
-                                <Card.Body>Quantity: 2</Card.Body>
-                            </Accordion.Collapse>
-                        </Card>
+                        {this.cartListLayout()}
                     </Accordion>
                 </Card.Body>
             </Card>
@@ -165,7 +206,7 @@ class CustomerPage extends Component{
                         <Nav.Link href="#placeorder" onClick={() => this.handleOrder()}>Order</Nav.Link>
                     </Nav>
                 </Navbar>
-                {this.state.cart && this.cartLayout()}
+                {this.state.cart && this.state.cartList && this.cartLayout()}
                 {this.state.order && this.state.productList && this.orderLayout()}
             </Container>    
         )
