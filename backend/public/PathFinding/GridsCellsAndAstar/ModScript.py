@@ -96,15 +96,6 @@ def astar(grid, time, start, end, dims):
     flag = 0
     while(True):
         node = costlist[0][1]
-        # print("node: ",node)
-        # for item in costlist:
-        #     print(item, end=' ')
-        # print("\n")
-        # print("!!!!!!!!!!!!!!!!!")
-        # print(node)
-        # print(grid[node[0]][node[1]].cost)
-        # print("!!!!!!!!!!!!!!!!!")
-        # print("\n")
         costlist.discard(costlist[0])
         if vis[node[0]][node[1]]==1:
             continue
@@ -160,15 +151,20 @@ def rev_mapcoord(coord):
     newcoord = (coord*100)+50
     return newcoord
 
-def directions(paths):
+def directions(paths, itemlist):
     dir ='n'
     dirarr = []
     dirarr.append(['x','y','path'])
+    cnt = 0
+    # print(itemlist[0])
     for i in range(len(paths)):
+        if len(paths[i])==1:
+            dirarr.append([dirarr[-1][2], itemlist[cnt][1][0], itemlist[cnt][1][1]])
+            cnt += 1
         for j in range(1, len(paths[i])):
             diffx = paths[i][j][0]-paths[i][j-1][0]
             diffy = paths[i][j][1]-paths[i][j-1][1]
-            
+            tmpdir = dir
             if dir=='n':
                 if diffx != 0:
                     if diffx > 0:
@@ -229,12 +225,53 @@ def directions(paths):
                     else:
                         dirarr.append([rev_mapcoord(paths[i][j-1][0]), rev_mapcoord(paths[i][j-1][1]), 'left'])
                         dir = 's'
+            if j==1 and i!=0:
+                tmpx = itemlist[cnt][0][0]-paths[i][j-1][0]
+                tmpy = itemlist[cnt][0][1]-paths[i][j-1][1]
+                if tmpdir == 'n':
+                    if tmpx>0:
+                        dirarr.append(['right', itemlist[cnt][1][0], itemlist[cnt][1][1]])
+                    elif tmpx<0:
+                        dirarr.append(['left', itemlist[cnt][1][0], itemlist[cnt][1][1]])
+                    elif tmpy>0:
+                        dirarr.append(['forward', itemlist[cnt][1][0], itemlist[cnt][1][1]])
+                    elif tmpy<0:
+                        dirarr.append(['backward', itemlist[cnt][1][0], itemlist[cnt][1][1]])
+                elif tmpdir == 's':
+                    if tmpx>0:
+                        dirarr.append(['left', itemlist[cnt][1][0], itemlist[cnt][1][1]])
+                    elif tmpx<0:
+                        dirarr.append(['right', itemlist[cnt][1][0], itemlist[cnt][1][1]])
+                    elif tmpy>0:
+                        dirarr.append(['backward', itemlist[cnt][1][0], itemlist[cnt][1][1]])
+                    elif tmpy<0:
+                        dirarr.append(['forward', itemlist[cnt][1][0], itemlist[cnt][1][1]])
+                elif tmpdir == 'e':
+                    if tmpx>0:
+                        dirarr.append(['forward', itemlist[cnt][1][0], itemlist[cnt][1][1]])
+                    elif tmpx<0:
+                        dirarr.append(['backward', itemlist[cnt][1][0], itemlist[cnt][1][1]])
+                    elif tmpy>0:
+                        dirarr.append(['left', itemlist[cnt][1][0], itemlist[cnt][1][1]])
+                    elif tmpy<0:
+                        dirarr.append(['right', itemlist[cnt][1][0], itemlist[cnt][1][1]])
+                elif tmpdir == 'w':
+                    if tmpx>0:
+                        dirarr.append(['backward', itemlist[cnt][1][0], itemlist[cnt][1][1]])
+                    elif tmpx<0:
+                        dirarr.append(['forward', itemlist[cnt][1][0], itemlist[cnt][1][1]])
+                    elif tmpy>0:
+                        dirarr.append(['right', itemlist[cnt][1][0], itemlist[cnt][1][1]])
+                    elif tmpy<0:
+                        dirarr.append(['left', itemlist[cnt][1][0], itemlist[cnt][1][1]])
+                cnt += 1
 
     return dirarr           
 
 
 def findshortestpath(time, start, end, nodeslist):
     
+
     unpklfile = open("/home/srihari/Desktop/Sparkplug_PandemicSparks/backend/public/PathFinding/GridsCellsAndAstar/grid","rb")
     grid = pickle.load(unpklfile)
     dims = (len(grid), len(grid[0]))
@@ -259,6 +296,7 @@ def findshortestpath(time, start, end, nodeslist):
             nodesdict[tup] = []
             nodesdict[tup].append(tmptup)
 
+    # print(nodesdict)
 
     start = mapcoord(start)
     end = mapcoord(end)
@@ -283,21 +321,15 @@ def findshortestpath(time, start, end, nodeslist):
         for ele in short:
             print(ele)
 
-
-
-
-        # updatePath(grid, time, short[0][1])
-        # for node in short[0][1]:
-        #     print(node)
-        #     print("node: ",grid[node[0]][node[1]].cost)
-        #     print("\n")
-
         short[0][1].reverse()
         paths.append(short[0][1])
         time += len(paths[-1]) - 1
         tmp = short[0][1][-1]
         nodes.remove(tmp)
         tmp = short[0][1][-2]
+        item = nodesdict[(rev_mapcoord(paths[-1][-1][0]), rev_mapcoord(paths[-1][-1][1]))][0]
+        shortestnodes.append([(paths[-1][-1][0], paths[-1][-1][0]), item])
+        nodesdict[(rev_mapcoord(paths[-1][-1][0]), rev_mapcoord(paths[-1][-1][1]))].remove(item)
         paths[-1].pop(-1)
     
     for path in paths:
@@ -317,7 +349,7 @@ def findshortestpath(time, start, end, nodeslist):
     pklfile = open("/home/srihari/Desktop/Sparkplug_PandemicSparks/backend/public/PathFinding/GridsCellsAndAstar/grid","ab")
     pickle.dump(grid,pklfile)
     pklfile.close()
-    dirarr = directions(paths)
+    dirarr = directions(paths, shortestnodes)
 
     with open('/home/srihari/Desktop/Sparkplug_PandemicSparks/backend/public/PathFinding/path.csv', 'w') as file:
         writer = csv.writer(file)

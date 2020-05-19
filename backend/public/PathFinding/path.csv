@@ -1,8 +1,24 @@
 x,y,path
+<<<<<<< HEAD
 150,50,left
 50,50,right
 50,150,straight
 50,250,straight
+=======
+550,550,straight
+550,650,left
+450,650,straight
+350,650,straight
+250,650,left
+250,550,straight
+250,450,right
+left,kh,kjhdf
+150,450,straight
+50,450,left
+50,350,straight
+50,250,reverse
+left,abc,efgh
+>>>>>>> 73a46511... Directions added
 50,350,straight
 50,450,straight
 50,550,straight
@@ -10,6 +26,7 @@ x,y,path
 50,750,straight
 50,850,straight
 50,950,straight
+<<<<<<< HEAD
 50,1050,straight
 50,1150,straight
 50,1250,straight
@@ -116,3 +133,8 @@ x,y,path
 1650,350,straight
 1650,250,right
 1550,250,left
+=======
+50,1050,right
+150,1050,straight
+250,1050,straight
+>>>>>>> 73a46511... Directions added
