@@ -107,26 +107,20 @@ def astar(grid, time, start, end, dims):
         times[node[0]][node[1]] = times[tmpnode[0]][tmpnode[1]]+1
         tmpnode = node
         for coord in adj:
-            if vis[coord[0]][coord[1]]==1:
-                continue
-
-            # print(coord)
             newtime = times[node[0]][node[1]] + 1
             if newtime in grid[coord[0]][coord[1]].cost.keys():
-                # print(newtime, "::", coord)
-                # print("lala: ",grid[coord[0]][coord[1]].cost)
                 g = (cost[node[0]][node[1]]) + (grid[coord[0]][coord[1]].cost[newtime])
             else:
                 g = (cost[node[0]][node[1]]) + (grid[coord[0]][coord[1]].cost[0])
             
             h = heuristic(coord[0], coord[1], end)
-            cost[coord[0]][coord[1]] = min(g,cost[coord[0]][coord[1]])
-            g = cost[coord[0]][coord[1]]
-            # cost[coord[0]][coord[1]] = g
-            # print(g, ", ", h)
-            costlist.add((g+h,coord))
-            
-            parents[coord[0]][coord[1]] = node
+            # cost[coord[0]][coord[1]] = min(g,cost[coord[0]][coord[1]])
+            # g = cost[coord[0]][coord[1]]
+
+            if g+h<cost[coord[0]][coord[1]]:
+                costlist.add((g+h,coord))
+                cost[coord[0]][coord[1]] = g+h
+                parents[coord[0]][coord[1]] = node
 
             if coord==end:
                 parents[end[0]][end[1]] = node
@@ -272,7 +266,7 @@ def directions(paths, itemlist):
 def findshortestpath(time, start, end, nodeslist):
     
 
-    unpklfile = open("/home/srihari/Desktop/Sparkplug_PandemicSparks/backend/public/PathFinding/GridsCellsAndAstar/grid","rb")
+    unpklfile = open("grid","rb")
     grid = pickle.load(unpklfile)
     dims = (len(grid), len(grid[0]))
     unpklfile.close()
@@ -345,13 +339,13 @@ def findshortestpath(time, start, end, nodeslist):
     #         print(grid[i][j].cost, end=" ")
     #     print("\n")
 
-    os.remove("/home/srihari/Desktop/Sparkplug_PandemicSparks/backend/public/PathFinding/GridsCellsAndAstar/grid")
-    pklfile = open("/home/srihari/Desktop/Sparkplug_PandemicSparks/backend/public/PathFinding/GridsCellsAndAstar/grid","ab")
+    os.remove("grid")
+    pklfile = open("grid","ab")
     pickle.dump(grid,pklfile)
     pklfile.close()
     dirarr = directions(paths, shortestnodes)
 
-    with open('/home/srihari/Desktop/Sparkplug_PandemicSparks/backend/public/PathFinding/path.csv', 'w') as file:
+    with open('../path.csv', 'w') as file:
         writer = csv.writer(file)
         writer.writerows(dirarr)
 
@@ -379,7 +373,7 @@ if __name__ == '__main__':
 
     nodeslist = []
 
-    with open('/home/srihari/Desktop/Sparkplug_PandemicSparks/backend/public/PathFinding/GridsCellsAndAstar/nodeslist.csv') as readfile:
+    with open('nodeslist.csv') as readfile:
         csvreader = csv.reader(readfile, delimiter=',')
         print(csvreader)
         for row in csvreader:
