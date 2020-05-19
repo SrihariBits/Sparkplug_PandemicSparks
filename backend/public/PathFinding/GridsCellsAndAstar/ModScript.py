@@ -266,7 +266,7 @@ def directions(paths, itemlist):
 def findshortestpath(time, start, end, nodeslist):
     
 
-    unpklfile = open("grid","rb")
+    unpklfile = open("/home/srihari/Desktop/Sparkplug_PandemicSparks/backend/public/PathFinding/GridsCellsAndAstar/grid","rb")
     grid = pickle.load(unpklfile)
     dims = (len(grid), len(grid[0]))
     unpklfile.close()
@@ -339,13 +339,13 @@ def findshortestpath(time, start, end, nodeslist):
     #         print(grid[i][j].cost, end=" ")
     #     print("\n")
 
-    os.remove("grid")
-    pklfile = open("grid","ab")
+    os.remove("/home/srihari/Desktop/Sparkplug_PandemicSparks/backend/public/PathFinding/GridsCellsAndAstar/grid")
+    pklfile = open("/home/srihari/Desktop/Sparkplug_PandemicSparks/backend/public/PathFinding/GridsCellsAndAstar/grid","ab")
     pickle.dump(grid,pklfile)
     pklfile.close()
     dirarr = directions(paths, shortestnodes)
 
-    with open('../path.csv', 'w') as file:
+    with open('/home/srihari/Desktop/Sparkplug_PandemicSparks/backend/public/PathFinding/path.csv', 'w') as file:
         writer = csv.writer(file)
         writer.writerows(dirarr)
 
@@ -373,7 +373,7 @@ if __name__ == '__main__':
 
     nodeslist = []
 
-    with open('nodeslist.csv') as readfile:
+    with open('/home/srihari/Desktop/Sparkplug_PandemicSparks/backend/public/PathFinding/GridsCellsAndAstar/nodeslist.csv') as readfile:
         csvreader = csv.reader(readfile, delimiter=',')
         print(csvreader)
         for row in csvreader:

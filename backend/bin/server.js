@@ -506,8 +506,18 @@ app.post('/items',(req,res) => {
         var readout = [];
         jsonObj.forEach(
             function myfunction(item,index){
-                readout.push(item.path);
-                readout.push(' ');
+                if(item.x==='left'||item.x==='right'||item.x==='forward'||item.x==='backward')
+                {
+                    readout.push('turn '+item.x);
+                    readout.push('and pick '+item.path+' from second shelf');
+                    readout.push(' ');
+                    readout.push(' add to order number '+item.y);
+                    readout.push(' ');
+                }
+                else{
+                    readout.push(item.path);
+                    readout.push(' ');
+                }
                 switch(item.path) {
                     case 'straight':
                         switch(direction){
