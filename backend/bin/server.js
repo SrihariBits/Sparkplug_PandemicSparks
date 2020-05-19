@@ -133,7 +133,7 @@ app.post('/findPrimaryCluster',(req,res) => {
     });
   })
 
-///////////////////////////////// GET ORDERS IN FIFO //////////////////////////////////////////////////
+///////////////////////////////// GET ORDERS IN FIFO AND BATCHING //////////////////////////////////////
 
 var numberToReceive = 10;
 var currentOrders = [];
@@ -141,7 +141,7 @@ var itemToClusters = new Map();
 var distanceVector = [];
 var avgDistance = new Map();
 var hclusterInput = [];
-var orderIDs = new Set();
+var orderIDs = new Map();
 var hclustering = require("./../public/SecondaryClustering/HierarchicalClustering");
 const lsh = Lsh.getInstance(config);
 walkets
@@ -152,7 +152,7 @@ walkets
     posts.forEach((order)=>{
         currentOrders.push(order);
         order.products.map((item)=>{
-            console.log(item);
+            //console.log(item);
             items
                 .findOne({'products':{$elemMatch: {productId:item.productId}}},function(err,data){
                     if(err) {
@@ -185,92 +185,129 @@ walkets
         avgDistance.forEach((tuple)=>{
               hclusterInput.push([tuple[0]/tuple[2],tuple[1]/tuple[2],tuple[3]]);
           });
-          var maxDistance = 0;
-          distanceVector.map((tuple1)=>{
-              distanceVector.map((tuple2)=>{
-                maxDistance=Math.max(maxDistance,Math.abs(tuple1[0]-tuple2[0])+Math.abs(tuple1[1]-tuple2[1]));
-              })
-          })
-          console.log(maxDistance);
-          if(maxDistance>2500)
-          {
-            var secClusterMap = {};
-            var c = hclustering.hierarchicalCluster(hclusterInput, "manhattan", "complete",5000);
-            app.get('/cluster',(req,res)=>{res.send(c);})
-            console.log(c);
-            var cnt=0;
-            c.forEach((primary)=>{
-                ++cnt;
-                function inOrderHelper(root) {
-                    if (root.hasOwnProperty("value")) {
-                       secClusterMap[root.value[2]]='C'+cnt;
-                       return;
-                    }
-                    inOrderHelper(root.left);
-                    if (root.hasOwnProperty("right"))
-                        inOrderHelper(root.right);
-                }
-                inOrderHelper(primary);
-            });
-            currentOrders.forEach((order,index)=>{
-                var LSHinput = "";
-                orderIDs.add(order.orderNo);
-                order.products.forEach((item)=>{
-                    LSHinput=LSHinput+secClusterMap[itemToClusters.get(item.productId)];
-                })
-                console.log(LSHinput);
-                lsh.addDocument(index, LSHinput);
+        var maxDistance = 0;
+        distanceVector.map((tuple1)=>{
+            distanceVector.map((tuple2)=>{
+            maxDistance=Math.max(maxDistance,Math.abs(tuple1[0]-tuple2[0])+Math.abs(tuple1[1]-tuple2[1]));
             })
-          }
-          else
-          {
-            currentOrders.forEach((order,index)=>{
+        })
+        console.log('maxDistance: '+maxDistance);
+        if(maxDistance>2500)
+        {
+        var secClusterMap = {};
+        var c = hclustering.hierarchicalCluster(hclusterInput, "manhattan", "complete",5000);
+        app.get('/cluster',(req,res)=>{res.send(c);})
+        console.log('hcluster: '+JSON.stringify(c));
+        var cnt=0;
+        c.forEach((primary)=>{
+            ++cnt;
+            function inOrderHelper(root) {
+                if (root.hasOwnProperty("value")) {
+                    secClusterMap[root.value[2]]='C'+cnt;
+                    return;
+                }
+                inOrderHelper(root.left);
+                if (root.hasOwnProperty("right"))
+                    inOrderHelper(root.right);
+            }
+            inOrderHelper(primary);
+        });
+        currentOrders.forEach((order)=>{
+            var LSHinput = "";
+            orderIDs.set(order.orderNo,true);
+            order.products.forEach((item)=>{
+                LSHinput=LSHinput+secClusterMap[itemToClusters.get(item.productId)];
+            })
+            //console.log(LSHinput);
+            //console.log(order.orderNo);
+            lsh.addDocument(order.orderNo, LSHinput);
+            })
+        }
+        else
+        {
+            currentOrders.forEach((order)=>{
                 var LSHinput = "";
-                orderIDs.add(order.orderNo);
+                orderIDs.add(order.orderNo,true);
                 order.products.forEach((item)=>{
                     LSHinput=LSHinput+itemToClusters.get(item.productId);
                 })
-                console.log(LSHinput);
-                lsh.addDocument(index, LSHinput);
+                //console.log(LSHinput);
+                lsh.addDocument(order.orderNo, LSHinput);
             })
-          }
-          console.log(orderIDs);
-          var msg = new batches({
-              batchId:'123',
-              status:'pending',
-              orders:[{orderId:"1a2b3d"}],
-              event_time:new Date()
-          });
-          //msg.save();
-          /*while(orderIDs.size>0)
-          {
-              if(orderIDs.size<=3)
-              {
-                batches.findOne({batchId:'123'},function(err,data){
-                    if(data===null)
-                    {
-                        var msg = new batches();
-                        orderIDs.forEach((order)=>{
-                            msg.orders.push(order.Id);
-                        })
-                        msg.event_time = new Date();
-                        msg.batchId = '123';
-                        msg.save();
-                    }
-                });
-                  
-              }
-              /*const q = {
-                  id:0,
-                  bucketSize:4
-              }
-              //console.log(lsh.query(q));
-          }*/
-          const q = {
-            id:1,
-            bucketSize:4
+        }
+
+        //console.log(orderIDs);
+        var batching = [];
+        var singleBatches = [];
+        orderIDs.forEach((value,key)=>{
+            //console.log('one');
+            if(value)
+            {
+                var result = lsh.query({id:key,bucketSize:4});
+                result.filter((res)=>orderIDs[res]);
+                //console.log(result.length);
+                if(result.length>=3)
+                {
+                    batching.push([result[0],result[1],result[2]]);
+                    //console.log(batching);
+                    orderIDs.set(result[0],false);
+                    orderIDs.set(result[1],false);
+                    orderIDs.set(result[2],false);
+                }
             }
-          console.log("uff"+lsh.query(q));
+        });
+        orderIDs.forEach((value,key)=>{
+            //console.log('two');
+            if(value)
+            {
+                var result = lsh.query({id:key,bucketSize:4});
+                if(result.length===1) singleBatches.push(key)
+            }
+        })
+        orderIDs.forEach((value,key)=>{
+            //console.log('three');
+            if(value)
+            {
+                var result = lsh.query({id:key,bucketSize:4});
+                result.filter((res)=>orderIDs[res]);
+                if(result.length==2)
+                {
+                    orderIDs.set(result[0],false);
+                    orderIDs.set(result[1],false);
+                    if(singleBatches.length>0)
+                    {
+                        orderIDs.set(singleBatches[0],false);
+                        batching.push([result[0],result[1],singleBatches[0]]);
+                        singleBatches.shift();
+                    }
+                    else{
+                        orderIDs.set(result[0],false);
+                        orderIDs.set(result[1],false);
+                        batching.push([result[0],result[1]]);
+                    }
+                }
+            }
+        })
+        while(true)
+        {
+            //console.log('four');
+            if(singleBatches.length>=3)
+            {
+                batching.push([singleBatches[0],singleBatches[1],singleBatches[2]]);
+                singleBatches.shift();
+                singleBatches.shift();
+                singleBatches.shift();
+            }
+            else if(singleBatches.length>0)
+            {
+                batching.push(singleBatches);
+                break;
+            }
+            else{
+                break;
+            }
+        }
+        console.log('batching: '+batching);
         },2000);
   });
 

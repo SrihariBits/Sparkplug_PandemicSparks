@@ -88,11 +88,13 @@ class Lsh {
   query (q = {}) {
     const { bucketSize = 1 } = q
     const signiture = this._getSigniture(q)
+    //console.log(this._storage);
     const docs = new Set()
     for (let i = 0, len = signiture.length - bucketSize + 1; i < len; i += bucketSize) {
       const candidates = this._storage.get(signiture[i]) || []
       for (let j = i + 1; j < i + bucketSize; j += 1) {
         const arr = this._storage.get(signiture[j]) || []
+        //console.log(arr);
         candidates.filter(x => arr.includes(x))
       }
       candidates.map(x => docs.add(x))
