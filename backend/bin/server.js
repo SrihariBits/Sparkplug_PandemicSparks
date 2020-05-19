@@ -163,7 +163,7 @@ setInterval(()=>{
         posts.forEach((order)=>{
             currentOrders.push(order);
             order.products.map((item)=>{
-                //console.log(item);
+                console.log(item);
                 items
                     .findOne({'products':{$elemMatch: {productId:item.productId}}},function(err,data){
                         if(err) {
@@ -339,16 +339,21 @@ setInterval(()=>{
                 });
                 msg.save();
             })
-            },2000);
+            },500);
       });
-},30000)
+},3000)
 
 //////////////////////////////////// CALL PATH FINDING ALGO ///////////////////////////////////////////
 const spawn = require('child_process').spawn;
 setTimeout(()=>{
 //app.post('/associatefree',(req,res)=>{
     batches.findOne({status:{ $eq: 'pending' }},function(err1,batchdata){
-        if(batchdata)
+        if(err1)
+        {
+            console.log(err);
+            throw new Error(err);
+        }
+        else if(batchdata)
         {
             var nodes='';
                 batchdata.orders.forEach((orderNo)=>{
@@ -387,71 +392,6 @@ setTimeout(()=>{
         }
     });
 
-    /*readFile('./public/PathFinding/path.csv', 'utf-8', (err, fileContent) => {
-        if(err) {
-            console.log(err);
-            throw new Error(err);
-        }
-        jsonObj = csvjson.toObject(fileContent);
-        var template = {id:'req.body.username',altitude:0,order:0,opacity:1,name:'req.body.username',visible:true,vertices:{},lines:{},
-                        holes:{},areas:{},items:{},selected:{vertices:[],lines:[],holes:[],areas:[],items:[]}};
-        var direction = 'north';
-        var pathtype ;
-        var readout = [];
-        jsonObj.forEach(
-            function myfunction(item,index){
-                readout.push(item.path);
-                readout.push(' ');
-                switch(item.path) {
-                    case 'straight':
-                        switch(direction){
-                            case 'north': pathtype = 'pathVT';break;
-                            case 'south': pathtype = 'pathVT';break;
-                            case 'east': pathtype = 'pathHZ';break;
-                            case 'west': pathtype = 'pathHZ';break;
-                            default: pathtype = 'pathHZ';
-                        }
-                        break;
-                    case 'left':
-                        switch(direction){
-                            case 'north': direction = 'west';pathtype = 'pathNW';break;
-                            case 'south': direction = 'east';pathtype = 'pathSE';break;
-                            case 'east': direction = 'north';pathtype = 'pathSW';break;
-                            case 'west': direction = 'south';pathtype = 'pathNE';break;
-                            default: pathtype = 'pathHZ';
-                        }
-                        break;
-                    case 'right':
-                        switch(direction){
-                            case 'north': direction = 'east';pathtype = 'pathNE';break;
-                            case 'south': direction = 'west';pathtype = 'pathSW';break;
-                            case 'east': direction = 'south';pathtype = 'pathNW';break;
-                            case 'west': direction = 'north';pathtype = 'pathSE';break;
-                            default: pathtype = 'pathHZ';
-                        }
-                        break;
-                    case 'reverse':
-                        switch(direction){
-                            case 'north': direction = 'south';pathtype = 'pathVT';break;
-                            case 'south': direction = 'north';pathtype = 'pathVT';break;
-                            case 'east': direction = 'west';pathtype = 'pathHZ';break;
-                            case 'west': direction = 'east';pathtype = 'pathHZ';break;
-                            default: pathtype = 'pathHZ';
-                        }
-                        break;
-                    default:
-                        pathtype = 'pathHZ'
-                } 
-                var pathguy={id:"q"+index,type:pathtype,prototype:"items",name:"Path",misc:{},selected:false,
-                properties:{color:"#"+((1<<24)*Math.random()|0).toString(16),width:{length:100,unit:"cm"},height:{length:100,unit:"cm"},
-                depth:{length:100,unit:"cm"}},visible:true,x:0,y:0,rotation:0}
-                pathguy.x = item.x;
-                pathguy.y = item.y;
-                size = Object.keys(template.items).length;
-                template.items["p"+size] = pathguy;
-            }
-        )
-    });*/
     //MAKE ASSOCIATE WAIT TILL I SAY READY
 },5000)
 
@@ -569,8 +509,8 @@ app.post('/items',(req,res) => {
         )
         var username = 'ujjwal';
         var adminTemplate = JSON.parse(JSON.stringify(template));
-        adminTemplate.id = username//req.body.username;
-        adminTemplate.name = username//req.body.username;
+        adminTemplate.id = req.body.username;
+        adminTemplate.name = req.body.username;
         var colour = "#"+((1<<24)*Math.random()|0).toString(16);
         for(let i=0;i<Object.keys(template.items).length;++i)
         {
@@ -584,7 +524,7 @@ app.post('/items',(req,res) => {
             }
             else{
                 fileContent=JSON.parse(fileContent)
-                var justforgag={...fileContent.layers,[username]:adminTemplate};
+                var justforgag={...fileContent.layers,[req.body.username]:adminTemplate};
                 fileContent.layers=justforgag;
                 console.log(fileContent);
                 writeFile('./public/PathFinding/adminpath.json',JSON.stringify(fileContent));
