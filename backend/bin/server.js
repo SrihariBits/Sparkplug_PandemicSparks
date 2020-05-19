@@ -345,28 +345,31 @@ setInterval(()=>{
 
 //////////////////////////////////// CALL PATH FINDING ALGO ///////////////////////////////////////////
 const spawn = require('child_process').spawn;
-
-app.post('/associatefree',(req,res)=>{
+setTimeout(()=>{
+//app.post('/associatefree',(req,res)=>{
     batches.findOne({status:{ $eq: 'pending' }},function(err1,batchdata){
         if(batchdata)
         {
-            var nodes=[];
-            setTimeout(()=>{
+            var nodes='';
                 batchdata.orders.forEach((orderNo)=>{
                     walkets.findOne({orderNo:{$eq: orderNo.orderId}},function(err2, orderdata){
-                        console.log(orderNo.orderId);
                         if(orderdata)
                         {
                             orderdata.products.forEach((item)=>{
                                 items.findOne({'products':{$elemMatch: {productId:item.productId}}},function(err3,itemdata){
-                                    nodes.push([itemdata.x,itemdata.y,orderdata.orderNo,item.description]);
+                                    nodes+=itemdata.x.toString()+','+itemdata.y.toString()+','+orderdata.orderNo+','+item.description+'\n';
+                                    //console.log(nodes);
                                 })
                             })
-                        }
+                        }  
                     })
+                    
                 });
-            },1000)
-            const ls = spawn('python', ['./public/PathFinding/GridsCellsAndAstar/ModScript.py',new Date(),[150,50],[1550,150],nodes]);
+            setTimeout(()=>{
+                console.log(nodes);
+                writeFile('./public/PathFinding/GridsCellsAndAstar/nodeslist.csv', nodes);
+                var d = new Date();
+            const ls = spawn('python', ['./public/PathFinding/GridsCellsAndAstar/ModScript.py',d.getUTCDate(),[150,50],[1550,150]]);
 
             ls.stdout.on('data', (data) => {
                 console.log(`stdout: ${data}`);
@@ -379,22 +382,68 @@ app.post('/associatefree',(req,res)=>{
               ls.on('close', (code) => {
                 console.log(`child process exited with code ${code}`);
               });
+            },2000);
+            
         }
     });
 
-    readFile('./public/PathFinding/path.csv', 'utf-8', (err, fileContent) => {
+    /*readFile('./public/PathFinding/path.csv', 'utf-8', (err, fileContent) => {
         if(err) {
             console.log(err);
             throw new Error(err);
         }
         jsonObj = csvjson.toObject(fileContent);
-        var template = {id:req.body.username,altitude:0,order:0,opacity:1,name:req.body.username,visible:true,vertices:{},lines:{},
+        var template = {id:'req.body.username',altitude:0,order:0,opacity:1,name:'req.body.username',visible:true,vertices:{},lines:{},
                         holes:{},areas:{},items:{},selected:{vertices:[],lines:[],holes:[],areas:[],items:[]}};
+        var direction = 'north';
+        var pathtype ;
         var readout = [];
         jsonObj.forEach(
             function myfunction(item,index){
-                var pathguy={id:"p"+index,type:pathtype,prototype:"items",name:"Path",misc:{},selected:false,
-                properties:{color:"#9c27b0",width:{length:100,unit:"cm"},height:{length:100,unit:"cm"},
+                readout.push(item.path);
+                readout.push(' ');
+                switch(item.path) {
+                    case 'straight':
+                        switch(direction){
+                            case 'north': pathtype = 'pathVT';break;
+                            case 'south': pathtype = 'pathVT';break;
+                            case 'east': pathtype = 'pathHZ';break;
+                            case 'west': pathtype = 'pathHZ';break;
+                            default: pathtype = 'pathHZ';
+                        }
+                        break;
+                    case 'left':
+                        switch(direction){
+                            case 'north': direction = 'west';pathtype = 'pathNW';break;
+                            case 'south': direction = 'east';pathtype = 'pathSE';break;
+                            case 'east': direction = 'north';pathtype = 'pathSW';break;
+                            case 'west': direction = 'south';pathtype = 'pathNE';break;
+                            default: pathtype = 'pathHZ';
+                        }
+                        break;
+                    case 'right':
+                        switch(direction){
+                            case 'north': direction = 'east';pathtype = 'pathNE';break;
+                            case 'south': direction = 'west';pathtype = 'pathSW';break;
+                            case 'east': direction = 'south';pathtype = 'pathNW';break;
+                            case 'west': direction = 'north';pathtype = 'pathSE';break;
+                            default: pathtype = 'pathHZ';
+                        }
+                        break;
+                    case 'reverse':
+                        switch(direction){
+                            case 'north': direction = 'south';pathtype = 'pathVT';break;
+                            case 'south': direction = 'north';pathtype = 'pathVT';break;
+                            case 'east': direction = 'west';pathtype = 'pathHZ';break;
+                            case 'west': direction = 'east';pathtype = 'pathHZ';break;
+                            default: pathtype = 'pathHZ';
+                        }
+                        break;
+                    default:
+                        pathtype = 'pathHZ'
+                } 
+                var pathguy={id:"q"+index,type:pathtype,prototype:"items",name:"Path",misc:{},selected:false,
+                properties:{color:"#"+((1<<24)*Math.random()|0).toString(16),width:{length:100,unit:"cm"},height:{length:100,unit:"cm"},
                 depth:{length:100,unit:"cm"}},visible:true,x:0,y:0,rotation:0}
                 pathguy.x = item.x;
                 pathguy.y = item.y;
@@ -402,13 +451,9 @@ app.post('/associatefree',(req,res)=>{
                 template.items["p"+size] = pathguy;
             }
         )
-        res.json({
-            data:template,
-            readout:readout
-        });
-    });
+    });*/
     //MAKE ASSOCIATE WAIT TILL I SAY READY
-})
+},5000)
 
 //////////////////////////////////////// CELL's ITEMS /////////////////////////////////////////////////
 
@@ -512,6 +557,26 @@ app.post('/items',(req,res) => {
                 template.items["p"+size] = pathguy;
             }
         )
+        /*var adminTemplate = template;
+        adminTemplate.id = req.body.username;
+        adminTemplate.name = req.body.username;
+        var colour = "#"+((1<<24)*Math.random()|0).toString(16);
+        for(let i=0;i<Object.keys(template.items).length;++i)
+        {
+            adminTemplate.items["p"+i]=colour;
+        }
+        readFile('./public/PathFinding/adminpath.json','utf-8', (err, fileContent) => {
+            if(err){
+                console.log(err);
+                throw new Error(err);
+            }
+            else{
+                var justforgag={...fileContent.layers,[req.body.username]:adminTemplate};
+                fileContent.layers=justforgag;
+                writeFile('./public/PathFinding/adminpath.json', );
+            }
+        });*/
+        
         res.json({
             data:template,
             readout:readout
@@ -527,7 +592,7 @@ app.post('/adminmaker',(req,res) => {
             console.log(err);
             throw new Error(err);
         }
-        var dat = JSON.parse(fileContent);
+        var dat = fileContent;
         res.json({
             data:dat
         })
