@@ -158,7 +158,7 @@ class AdminPage extends Component{
                 </Row>
             </Card.Title>
             <div id="main">
-                <FloorPlan isAdmin={false} username={localStorage.getItem("username")} />
+                <FloorPlan isAdmin={true} username={localStorage.getItem("username")} />
             </div>
         </Card.Body>
         </Card>
@@ -167,7 +167,7 @@ class AdminPage extends Component{
 
     render() {
         return (
-            <Container>
+            <Container fluid>
                 <Navbar bg="primary" variant="dark">
                     <Navbar.Brand href="/home">Walmart</Navbar.Brand>
                     <Nav className="mr-auto">
