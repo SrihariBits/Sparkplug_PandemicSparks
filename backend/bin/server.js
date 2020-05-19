@@ -567,25 +567,29 @@ app.post('/items',(req,res) => {
                 template.items["p"+size] = pathguy;
             }
         )
-        /*var adminTemplate = template;
-        adminTemplate.id = req.body.username;
-        adminTemplate.name = req.body.username;
+        var username = 'ujjwal';
+        var adminTemplate = JSON.parse(JSON.stringify(template));
+        adminTemplate.id = username//req.body.username;
+        adminTemplate.name = username//req.body.username;
         var colour = "#"+((1<<24)*Math.random()|0).toString(16);
         for(let i=0;i<Object.keys(template.items).length;++i)
         {
-            adminTemplate.items["p"+i]=colour;
+            adminTemplate.items["p"+i].properties.color=colour;
         }
+        console.log(adminTemplate);
         readFile('./public/PathFinding/adminpath.json','utf-8', (err, fileContent) => {
             if(err){
                 console.log(err);
                 throw new Error(err);
             }
             else{
-                var justforgag={...fileContent.layers,[req.body.username]:adminTemplate};
+                fileContent=JSON.parse(fileContent)
+                var justforgag={...fileContent.layers,[username]:adminTemplate};
                 fileContent.layers=justforgag;
-                writeFile('./public/PathFinding/adminpath.json', );
+                console.log(fileContent);
+                writeFile('./public/PathFinding/adminpath.json',JSON.stringify(fileContent));
             }
-        });*/
+        });
         
         res.json({
             data:template,
@@ -602,7 +606,7 @@ app.post('/adminmaker',(req,res) => {
             console.log(err);
             throw new Error(err);
         }
-        var dat = fileContent;
+        var dat = JSON.parse(fileContent);
         res.json({
             data:dat
         })
