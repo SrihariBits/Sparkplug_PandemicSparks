@@ -8,6 +8,7 @@ import {Container,
         Col,
         Accordion,
     } from "react-bootstrap";
+import axios from "axios";
 
 class AdminPage extends Component{
     constructor(props){
@@ -16,6 +17,77 @@ class AdminPage extends Component{
             customer: true,
             associate: false,
         };
+    }
+
+    componentWillMount() {
+        axios.get('http://127.0.0.1:5000/user/customer')
+        .then(res => {
+            const customerList = res.data;
+            this.setState({customerList: customerList});
+            console.log(this.state.customerList);
+        })
+
+        axios.get('http://127.0.0.1:5000/user/associate')
+        .then(res => {
+            const associateList = res.data;
+            this.setState({associateList: associateList});
+            console.log(this.state.associateList);
+        })
+
+    }
+
+    customerListLayout = () => {
+        let customerList = [];
+        for(let i=0; i<this.state.customerList.length; i++){
+            customerList.push(
+                <Card>
+                    <Card.Header>
+                        <Accordion.Toggle as={Button} variant="primary" eventKey={i}>
+                            {this.state.customerList[i]["first_name"] + ' ' + this.state.customerList[i]["last_name"]}
+                        </Accordion.Toggle>
+                    </Card.Header>
+                    <Accordion.Collapse eventKey={i}>
+                        <Card.Body>
+                            Username: {this.state.customerList[i]["username"]}
+                            <br />
+                            First Name: {this.state.customerList[i]["first_name"]}
+                            <br />
+                            Last Name: {this.state.customerList[i]["last_name"]}
+                            <br />
+                            Shipping Address: {this.state.customerList[i]["shipping_address"]}
+                        </Card.Body>
+                    </Accordion.Collapse>
+                </Card>
+            )
+        }
+        return customerList;
+    }
+
+    associateListLayout = () => {
+        let associateList = [];
+        for(let i=0; i<this.state.associateList.length; i++){
+            associateList.push(
+                <Card>
+                    <Card.Header>
+                        <Accordion.Toggle as={Button} variant="primary" eventKey={i}>
+                            {this.state.associateList[i]["first_name"] + ' ' + this.state.associateList[i]["last_name"]}
+                        </Accordion.Toggle>
+                    </Card.Header>
+                    <Accordion.Collapse eventKey={i}>
+                        <Card.Body>
+                            Username: {this.state.associateList[i]["username"]}
+                            <br />
+                            First Name: {this.state.associateList[i]["first_name"]}
+                            <br />
+                            Last Name: {this.state.associateList[i]["last_name"]}
+                            <br />
+                            Location: {this.state.associateList[i]["location"]}
+                        </Card.Body>
+                    </Accordion.Collapse>
+                </Card>
+            )
+        }
+        return associateList;
     }
 
     handleCustomer = () => {
@@ -37,6 +109,9 @@ class AdminPage extends Component{
                             </Col>
                         </Row>
                     </Card.Title>
+                    <Accordion>
+                        {this.customerListLayout()}
+                    </Accordion>
                 </Card.Body>
             </Card>
         )
@@ -53,6 +128,9 @@ class AdminPage extends Component{
                             </Col>
                         </Row>
                     </Card.Title>
+                    <Accordion>
+                        {this.associateListLayout()}
+                    </Accordion>
                 </Card.Body>
             </Card>
         )
@@ -68,8 +146,8 @@ class AdminPage extends Component{
                         <Nav.Link href="#associate" onClick={this.handleAssociate}>Associates</Nav.Link>
                     </Nav>
                 </Navbar>
-                {this.state.customer && this.customerLayout()}
-                {this.state.associate && this.associateLayout()}
+                {this.state.customer && this.state.customerList && this.customerLayout()}
+                {this.state.associate && this.state.associateList && this.associateLayout()}
             </Container>
         )
     }
