@@ -72,9 +72,15 @@ class CustomerPage extends Component{
 
         axios.get('http://127.0.0.1:5000/user/customer/' + localStorage.getItem("username"))
         .then(res => {
+            if(res.data == null){
+                console.log("Wrong username");
+                this.props.history.push(`/home`);
+            }
+            else{
             const userid = res.data["_id"];
             this.setState({userid: userid});
             console.log(this.state.userid);
+            }
         })
     }
 
@@ -94,7 +100,7 @@ class CustomerPage extends Component{
         let walketOrder = this.state.walketOrder;
         walketOrder["products"]
             .push({
-                "productID": this.state.productList[event.target.value]["_id"],
+                "productID": this.state.productList[event.target.value]["productID"],
                 "description": this.state.productList[event.target.value]["description"],
                 "unitPrice": {
                     "currencyAmount": String(this.state.productList[event.target.value]["unitPrice"]),
@@ -251,7 +257,7 @@ class CustomerPage extends Component{
         return (
             <Container>
                 <Navbar bg="primary" variant="dark">
-                    <Navbar.Brand href="#">Walmart</Navbar.Brand>
+                    <Navbar.Brand href="/home">Walmart</Navbar.Brand>
                     <Nav className="mr-auto">
                         <Nav.Link href="#cart" onClick={() => this.handleCart()}>Cart</Nav.Link>
                         <Nav.Link href="#placeorder" onClick={() => this.handleOrder()}>Order</Nav.Link>
