@@ -37,7 +37,9 @@ exports.walket_create_post = function(req, res) {
         'orderNo': req.body.orderNo,
         'products': req.body.products,
         'event_time': req.body.event_time,
+        'status': req.body.status,
     }
+    console.log(req_data);
 
     res_data = {}
 

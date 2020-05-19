@@ -95,7 +95,7 @@ class AssociatePage extends Component{
 
     render() {
         return (
-            <Container>
+            <Container fluid>
                 <Navbar bg="primary" variant="dark">
                     <Navbar.Brand href="/home">Walmart</Navbar.Brand>
                     <Nav className="mr-auto">
