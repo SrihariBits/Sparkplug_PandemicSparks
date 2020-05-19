@@ -46,6 +46,7 @@ class FloorPlan extends Component {
           <Provider store={store}>
             <ReactPlanner
               isAdmin={this.props.isAdmin}
+              username={this.props.username}
               catalog={MyCatalog}
               width={1400}
               height={600}
