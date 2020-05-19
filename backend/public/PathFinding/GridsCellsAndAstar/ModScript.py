@@ -3,6 +3,7 @@ from sortedcontainers import SortedList
 import pickle
 import os
 import csv
+import sys
 def getValid(node, dims):
     
     r = node[0]
@@ -48,7 +49,7 @@ def updatePath(grid, time, path):
     # for node in path[::-1]:
     print("!!!!!!!!!!!")
     for node in path:
-        print(node, end=' ')
+        #print(node, end=' ')
         if cnttime in grid[node[0]][node[1]].cost.keys():
             grid[node[0]][node[1]].cost[cnttime] = grid[node[0]][node[1]].cost[cnttime] + penalty
         else:
@@ -245,7 +246,9 @@ def findshortestpath(time, start, end, nodeslist):
     
     nodesdict = {}
     nodes = []
+    #print(nodeslist)
     for node in nodeslist:
+        print(node)
         nodes.append((node[0],node[1]))
         tup = (node[0],node[1])
         tmptup = (node[2],node[3])
@@ -330,3 +333,12 @@ def findshortestpath(time, start, end, nodeslist):
 # path1 = findshortestpath(5, start, end, nodes)
 # print("\n\n\n\n")
 # print(path1)
+
+if __name__== '__main__':
+    start = (50,50)
+    end = (2950,1950)
+    nodes = [[450,1550,'abc','khkjdh'],[250,1850,'def','jhkj'],[350,950,'ghi','wuey'], [350,950,'jkl','9487'], [350,950,'mno','849ie']]
+    print(nodes)
+    print(type(sys.argv[4][0]))
+    path1 = findshortestpath(0,start,end,sys.argv[4])
+    print(path1)

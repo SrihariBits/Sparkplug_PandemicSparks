@@ -2,6 +2,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var WalKet=new mongoose.Schema({
+    status:String,
     ShipToAddress:{
         address:{
             addressLineTwo:String,

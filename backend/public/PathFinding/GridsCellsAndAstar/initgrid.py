@@ -32,7 +32,8 @@ for coord in shelf_coords:
 
 for i in range(len(grid)):
     for j in range(len(grid[0])):
-        print(grid[i][j].cost, end=" ")
+        #print(grid[i][j].cost, end=" ")
+        pass
     print("\n")
 os.remove("grid")
 pklfile = open("grid","ab")

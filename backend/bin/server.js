@@ -53,6 +53,7 @@ var batches = require('./../public/Models/Batches');
 //////////////////////////////////// WALKET ORDERS/////////////////////////////////////////////////////
 
 let message=new walkets({
+    status:'pending',
     ShipToAddress:{
         address:{
             addressLineTwo:"chennai,TN",
@@ -76,13 +77,22 @@ let message=new walkets({
             currencyUnit:"USD"
         }
     },
-    orderNo:"1a2b3c",
+    orderNo:"1a2b3e",
     products:[
         {
-            productId:"PR89GGT53",
-            description:"Mac and Cheese",
+            productId:"PR18ZZY45",
+            description:"Salsa Bowls Set",
             unitPrice:{
-                currencyAmount:"9.01",
+                currencyAmount:"82.56",
+                currencyUnit:"USD"
+            },
+            orderQuantity:"1"
+        },
+        {
+            productId:"PR14TYZ78",
+            description:"Pink Skinless Salmon",
+            unitPrice:{
+                currencyAmount:"7.92",
                 currencyUnit:"USD"
             },
             orderQuantity:"2"
@@ -135,182 +145,270 @@ app.post('/findPrimaryCluster',(req,res) => {
 
 ///////////////////////////////// GET ORDERS IN FIFO AND BATCHING //////////////////////////////////////
 
-var numberToReceive = 10;
-var currentOrders = [];
-var itemToClusters = new Map();
-var distanceVector = [];
-var avgDistance = new Map();
-var hclusterInput = [];
-var orderIDs = new Map();
-var hclustering = require("./../public/SecondaryClustering/HierarchicalClustering");
-const lsh = Lsh.getInstance(config);
-walkets
-  .find({orderNo:{ $ne: null }})
-  .sort({'event_time': 1})
-  .limit(numberToReceive)
-  .exec(function(err, posts) {
-    posts.forEach((order)=>{
-        currentOrders.push(order);
-        order.products.map((item)=>{
-            //console.log(item);
-            items
-                .findOne({'products':{$elemMatch: {productId:item.productId}}},function(err,data){
-                    if(err) {
-                        console.log(err);
-                        throw new Error(err);
-                    }
-                    else if(data===null)
-                    {
-                        console.log("item with ProductId "+item.productId+"is currently not available in store");
-                    }
-                    else{
-                        var temp = Mapper.get(data.Id);
-                        itemToClusters.set(item.productId,temp);
-                        if(!avgDistance.has(temp))
+setInterval(()=>{
+    var numberToReceive = 10;
+    var currentOrders = [];
+    var itemToClusters = new Map();
+    var distanceVector = [];
+    var avgDistance = new Map();
+    var hclusterInput = [];
+    var orderIDs = new Map();
+    var hclustering = require("./../public/SecondaryClustering/HierarchicalClustering");
+    const lsh = Lsh.getInstance(config);
+    walkets
+      .find({status:{ $eq: 'pending' }})
+      .sort({'event_time': 1})
+      .limit(numberToReceive)
+      .exec(function(err, posts) {
+        posts.forEach((order)=>{
+            currentOrders.push(order);
+            order.products.map((item)=>{
+                //console.log(item);
+                items
+                    .findOne({'products':{$elemMatch: {productId:item.productId}}},function(err,data){
+                        if(err) {
+                            console.log(err);
+                            throw new Error(err);
+                        }
+                        else if(data===null)
                         {
-                            //console.log(data);
-                            avgDistance.set(temp,[parseInt(data.x),parseInt(data.y),1,temp]);
-                            distanceVector.push([parseInt(data.x),parseInt(data.y)]);
+                            console.log("item with ProductId "+item.productId+"is currently not available in store");
                         }
                         else{
-                            var a = avgDistance.get(temp);
-                            avgDistance.set(temp,[a[0]+parseInt(data.x),a[1]+parseInt(data.y),a[2]+1,a[3]]);
+                            var temp = Mapper.get(data.Id);
+                            itemToClusters.set(item.productId,temp);
+                            if(!avgDistance.has(temp))
+                            {
+                                //console.log(data);
+                                avgDistance.set(temp,[parseInt(data.x),parseInt(data.y),1,temp]);
+                                distanceVector.push([parseInt(data.x),parseInt(data.y)]);
+                            }
+                            else{
+                                var a = avgDistance.get(temp);
+                                avgDistance.set(temp,[a[0]+parseInt(data.x),a[1]+parseInt(data.y),a[2]+1,a[3]]);
+                            }
                         }
-                    }
+                    })
+            });
+        });
+    
+        setTimeout(()=>{
+            avgDistance.forEach((tuple)=>{
+                  hclusterInput.push([tuple[0]/tuple[2],tuple[1]/tuple[2],tuple[3]]);
+              });
+            var maxDistance = 0;
+            distanceVector.map((tuple1)=>{
+                distanceVector.map((tuple2)=>{
+                maxDistance=Math.max(maxDistance,Math.abs(tuple1[0]-tuple2[0])+Math.abs(tuple1[1]-tuple2[1]));
                 })
-        });
-    });
-
-    setTimeout(()=>{
-        avgDistance.forEach((tuple)=>{
-              hclusterInput.push([tuple[0]/tuple[2],tuple[1]/tuple[2],tuple[3]]);
-          });
-        var maxDistance = 0;
-        distanceVector.map((tuple1)=>{
-            distanceVector.map((tuple2)=>{
-            maxDistance=Math.max(maxDistance,Math.abs(tuple1[0]-tuple2[0])+Math.abs(tuple1[1]-tuple2[1]));
             })
-        })
-        console.log('maxDistance: '+maxDistance);
-        if(maxDistance>2500)
-        {
-        var secClusterMap = {};
-        var c = hclustering.hierarchicalCluster(hclusterInput, "manhattan", "complete",5000);
-        app.get('/cluster',(req,res)=>{res.send(c);})
-        console.log('hcluster: '+JSON.stringify(c));
-        var cnt=0;
-        c.forEach((primary)=>{
-            ++cnt;
-            function inOrderHelper(root) {
-                if (root.hasOwnProperty("value")) {
-                    secClusterMap[root.value[2]]='C'+cnt;
-                    return;
+            console.log('maxDistance: '+maxDistance);
+            if(maxDistance>2500)
+            {
+            var secClusterMap = {};
+            var c = hclustering.hierarchicalCluster(hclusterInput, "manhattan", "complete",5000);
+            app.get('/cluster',(req,res)=>{res.send(c);})
+            console.log('hcluster: '+JSON.stringify(c));
+            var cnt=0;
+            c.forEach((primary)=>{
+                ++cnt;
+                function inOrderHelper(root) {
+                    if (root.hasOwnProperty("value")) {
+                        secClusterMap[root.value[2]]='C'+cnt;
+                        return;
+                    }
+                    inOrderHelper(root.left);
+                    if (root.hasOwnProperty("right"))
+                        inOrderHelper(root.right);
                 }
-                inOrderHelper(root.left);
-                if (root.hasOwnProperty("right"))
-                    inOrderHelper(root.right);
-            }
-            inOrderHelper(primary);
-        });
-        currentOrders.forEach((order)=>{
-            var LSHinput = "";
-            orderIDs.set(order.orderNo,true);
-            order.products.forEach((item)=>{
-                LSHinput=LSHinput+secClusterMap[itemToClusters.get(item.productId)];
-            })
-            //console.log(LSHinput);
-            //console.log(order.orderNo);
-            lsh.addDocument(order.orderNo, LSHinput);
-            })
-        }
-        else
-        {
+                inOrderHelper(primary);
+            });
             currentOrders.forEach((order)=>{
                 var LSHinput = "";
-                orderIDs.add(order.orderNo,true);
+                orderIDs.set(order.orderNo,true);
                 order.products.forEach((item)=>{
-                    LSHinput=LSHinput+itemToClusters.get(item.productId);
+                    LSHinput=LSHinput+secClusterMap[itemToClusters.get(item.productId)];
                 })
                 //console.log(LSHinput);
+                //console.log(order.orderNo);
                 lsh.addDocument(order.orderNo, LSHinput);
-            })
-        }
-
-        //console.log(orderIDs);
-        var batching = [];
-        var singleBatches = [];
-        orderIDs.forEach((value,key)=>{
-            //console.log('one');
-            if(value)
-            {
-                var result = lsh.query({id:key,bucketSize:4});
-                result.filter((res)=>orderIDs[res]);
-                //console.log(result.length);
-                if(result.length>=3)
-                {
-                    batching.push([result[0],result[1],result[2]]);
-                    //console.log(batching);
-                    orderIDs.set(result[0],false);
-                    orderIDs.set(result[1],false);
-                    orderIDs.set(result[2],false);
-                }
+                })
             }
-        });
-        orderIDs.forEach((value,key)=>{
-            //console.log('two');
-            if(value)
+            else
             {
-                var result = lsh.query({id:key,bucketSize:4});
-                if(result.length===1) singleBatches.push(key)
+                currentOrders.forEach((order)=>{
+                    var LSHinput = "";
+                    orderIDs.set(order.orderNo,true);
+                    order.products.forEach((item)=>{
+                        LSHinput=LSHinput+itemToClusters.get(item.productId);
+                    })
+                    //console.log(LSHinput);
+                    lsh.addDocument(order.orderNo, LSHinput);
+                })
             }
-        })
-        orderIDs.forEach((value,key)=>{
-            //console.log('three');
-            if(value)
-            {
-                var result = lsh.query({id:key,bucketSize:4});
-                result.filter((res)=>orderIDs[res]);
-                if(result.length==2)
+    
+            //console.log(orderIDs);
+            var batching = [];
+            var singleBatches = [];
+            orderIDs.forEach((value,key)=>{
+                //console.log('one');
+                if(value)
                 {
-                    orderIDs.set(result[0],false);
-                    orderIDs.set(result[1],false);
-                    if(singleBatches.length>0)
+                    var result = lsh.query({id:key,bucketSize:4});
+                    result.filter((res)=>orderIDs[res]);
+                    //console.log(result.length);
+                    if(result.length>=3)
                     {
-                        orderIDs.set(singleBatches[0],false);
-                        batching.push([result[0],result[1],singleBatches[0]]);
-                        singleBatches.shift();
-                    }
-                    else{
+                        batching.push([result[0],result[1],result[2]]);
+                        //console.log(batching);
                         orderIDs.set(result[0],false);
                         orderIDs.set(result[1],false);
-                        batching.push([result[0],result[1]]);
+                        orderIDs.set(result[2],false);
                     }
                 }
-            }
-        })
-        while(true)
-        {
-            //console.log('four');
-            if(singleBatches.length>=3)
+            });
+            orderIDs.forEach((value,key)=>{
+                //console.log('two');
+                if(value)
+                {
+                    var result = lsh.query({id:key,bucketSize:4});
+                    if(result.length===1) singleBatches.push(key);
+                }
+            })
+            orderIDs.forEach((value,key)=>{
+                //console.log('three');
+                if(value)
+                {
+                    var result = lsh.query({id:key,bucketSize:4});
+                    result.filter((res)=>orderIDs[res]);
+                    if(result.length==2)
+                    {
+                        orderIDs.set(result[0],false);
+                        orderIDs.set(result[1],false);
+                        if(singleBatches.length>0)
+                        {
+                            orderIDs.set(singleBatches[0],false);
+                            batching.push([result[0],result[1],singleBatches[0]]);
+                            singleBatches.shift();
+                        }
+                        else{
+                            orderIDs.set(result[0],false);
+                            orderIDs.set(result[1],false);
+                            batching.push([result[0],result[1]]);
+                        }
+                    }
+                }
+            })
+            while(true)
             {
-                batching.push([singleBatches[0],singleBatches[1],singleBatches[2]]);
-                singleBatches.shift();
-                singleBatches.shift();
-                singleBatches.shift();
+                //console.log('four');
+                if(singleBatches.length>=3)
+                {
+                    batching.push([singleBatches[0],singleBatches[1],singleBatches[2]]);
+                    singleBatches.shift();
+                    singleBatches.shift();
+                    singleBatches.shift();
+                }
+                else if(singleBatches.length>0)
+                {
+                    batching.push(singleBatches);
+                    break;
+                }
+                else{
+                    break;
+                }
             }
-            else if(singleBatches.length>0)
-            {
-                batching.push(singleBatches);
-                break;
-            }
-            else{
-                break;
-            }
-        }
-        console.log('batching: '+batching);
-        },2000);
-  });
+            console.log('batching: '+batching);
+            batching.forEach((batch)=>{
+                var tempo = [];
+                batch.map((b)=>{
+                    tempo.push({orderId:b})
+                    console.log(b);
+                    walkets
+                        .findOne({orderNo:{ $eq: b }},function(err,data){
+                            data.status='taken';
+                            data.save((err)=>{
+                                if(err)console.log(err);
+                            });
+                        })
+                });
+                var msg = new batches({
+                    status:'pending',
+                    orders:tempo,
+                    event_time: new Date()
+                });
+                msg.save();
+            })
+            },2000);
+      });
+},30000)
 
+//////////////////////////////////// CALL PATH FINDING ALGO ///////////////////////////////////////////
+const spawn = require('child_process').spawn;
+
+app.post('/associatefree',(req,res)=>{
+    batches.findOne({status:{ $eq: 'pending' }},function(err1,batchdata){
+        if(batchdata)
+        {
+            var nodes=[];
+            setTimeout(()=>{
+                batchdata.orders.forEach((orderNo)=>{
+                    walkets.findOne({orderNo:{$eq: orderNo.orderId}},function(err2, orderdata){
+                        console.log(orderNo.orderId);
+                        if(orderdata)
+                        {
+                            orderdata.products.forEach((item)=>{
+                                items.findOne({'products':{$elemMatch: {productId:item.productId}}},function(err3,itemdata){
+                                    nodes.push([itemdata.x,itemdata.y,orderdata.orderNo,item.description]);
+                                })
+                            })
+                        }
+                    })
+                });
+            },1000)
+            const ls = spawn('python', ['./public/PathFinding/GridsCellsAndAstar/ModScript.py',new Date(),[150,50],[1550,150],nodes]);
+
+            ls.stdout.on('data', (data) => {
+                console.log(`stdout: ${data}`);
+              });
+              
+              ls.stderr.on('data', (data) => {
+                console.log(`stderr: ${data}`);
+              });
+              
+              ls.on('close', (code) => {
+                console.log(`child process exited with code ${code}`);
+              });
+        }
+    });
+
+    readFile('./public/PathFinding/path.csv', 'utf-8', (err, fileContent) => {
+        if(err) {
+            console.log(err);
+            throw new Error(err);
+        }
+        jsonObj = csvjson.toObject(fileContent);
+        var template = {id:req.body.username,altitude:0,order:0,opacity:1,name:req.body.username,visible:true,vertices:{},lines:{},
+                        holes:{},areas:{},items:{},selected:{vertices:[],lines:[],holes:[],areas:[],items:[]}};
+        var readout = [];
+        jsonObj.forEach(
+            function myfunction(item,index){
+                var pathguy={id:"p"+index,type:pathtype,prototype:"items",name:"Path",misc:{},selected:false,
+                properties:{color:"#9c27b0",width:{length:100,unit:"cm"},height:{length:100,unit:"cm"},
+                depth:{length:100,unit:"cm"}},visible:true,x:0,y:0,rotation:0}
+                pathguy.x = item.x;
+                pathguy.y = item.y;
+                size = Object.keys(template.items).length;
+                template.items["p"+size] = pathguy;
+            }
+        )
+        res.json({
+            data:template,
+            readout:readout
+        });
+    });
+    //MAKE ASSOCIATE WAIT TILL I SAY READY
+})
 
 //////////////////////////////////////// CELL's ITEMS /////////////////////////////////////////////////
 
@@ -420,6 +518,21 @@ app.post('/items',(req,res) => {
         });
     });
   })
+
+///////////////////////////////////// SHOWING ADMIN PATH ///////////////////////////////////////////////
+
+app.post('/adminmaker',(req,res) => {
+    readFile('./public/PathFinding/adminpath.json','utf-8',(err, fileContent) => {
+        if(err) {
+            console.log(err);
+            throw new Error(err);
+        }
+        var dat = JSON.parse(fileContent);
+        res.json({
+            data:dat
+        })
+  })
+})
 
 //////////////////////////////////// WAREHOUSE STUFF //////////////////////////////////////////////////
 
