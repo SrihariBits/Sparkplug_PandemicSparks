@@ -2,6 +2,7 @@ from ModCell import Cell
 from sortedcontainers import SortedList
 import pickle
 import os
+import sys
 import csv
 def getValid(node, dims):
     
@@ -321,12 +322,45 @@ def findshortestpath(time, start, end, nodeslist):
 
     return paths
 
+if __name__ == '__main__':
+    time = int(sys.argv[1])
+    start = sys.argv[2][1:len(sys.argv[2])-1]
+    start = start.split(',')
+    for i in range(len(start)):
+        start[i] = int(start[i])
+    
+    end = sys.argv[3][1:len(sys.argv[3])-1]
+    end = end.split(',')
+    for i in range(len(end)):
+        end[i] = int(end[i])
 
+    # print(start)
+    # print(end)
+
+    nodeslist = []
+
+    with open('nodeslist.csv') as readfile:
+        csvreader = csv.reader(readfile, delimiter=',')
+        for row in csvreader:
+            # print(row)
+            tmp = []
+            tmp.append(int(row[0]))
+            tmp.append(int(row[1]))
+            tmp.append(row[2])
+            tmp.append(row[3])
+            nodeslist.append(tmp)
+    
+    print(nodeslist)
+    print(findshortestpath(time,start,end,nodeslist))
+    
 
 #uncomment the following to test run
-# start = (50,50)
-# end = (2950,1950)
+# start = [50,50]
+# end = [2950,1950]
 # nodes = [[450,1550,'abc','khkjdh'],[250,1850,'def','jhkj'],[350,950,'ghi','wuey'], [350,950,'jkl','9487'], [350,950,'mno','849ie']]
 # path1 = findshortestpath(5, start, end, nodes)
 # print("\n\n\n\n")
 # print(path1)
+
+
+#reference: def findshortestpath(time, start, end, nodeslist)
