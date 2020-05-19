@@ -9,6 +9,8 @@ import {Container,
         Accordion,
     } from "react-bootstrap";
 import axios from "axios";
+import FloorPlan from "./FloorPlan";
+
 
 class AdminPage extends Component{
     constructor(props){
@@ -16,6 +18,7 @@ class AdminPage extends Component{
         this.state = {
             customer: true,
             associate: false,
+            map: false,
         };
     }
 
@@ -91,11 +94,11 @@ class AdminPage extends Component{
     }
 
     handleCustomer = () => {
-        this.setState({customer: true, associate: false});
+        this.setState({customer: true, associate: false, map:false});
     }
 
     handleAssociate = () => {
-        this.setState({customer: false, associate: true});
+        this.setState({customer: false, associate: true, map:false});
     }
 
     customerLayout = () => {
@@ -136,6 +139,32 @@ class AdminPage extends Component{
         )
     }
 
+    handleMap = () => {
+        this.setState({map: true, customer: false, associate: false})
+    }
+
+    handleMapLayout = () => {
+        return (
+        <Card>
+        <Card.Body>
+            <Card.Title>
+                <Row>
+                    <Col md={10}>
+                        Location Map
+                    </Col>
+                    <Col md={2}>
+                        <Button variant="primary" onClick={this.handleFinish} disabled={this.state.status}>Finish Order</Button>
+                    </Col>
+                </Row>
+            </Card.Title>
+            <div id="main">
+                <FloorPlan isAdmin={false} username={localStorage.getItem("username")} />
+            </div>
+        </Card.Body>
+        </Card>
+        )
+    }
+
     render() {
         return (
             <Container>
@@ -144,10 +173,12 @@ class AdminPage extends Component{
                     <Nav className="mr-auto">
                         <Nav.Link href="#customer" onClick={this.handleCustomer}>Customers</Nav.Link>
                         <Nav.Link href="#associate" onClick={this.handleAssociate}>Associates</Nav.Link>
+                        <Nav.Link href="#map" onClick={this.handleMap}>Map</Nav.Link>
                     </Nav>
                 </Navbar>
                 {this.state.customer && this.state.customerList && this.customerLayout()}
                 {this.state.associate && this.state.associateList && this.associateLayout()}
+                {this.state.map && this.handleMapLayout()}
             </Container>
         )
     }

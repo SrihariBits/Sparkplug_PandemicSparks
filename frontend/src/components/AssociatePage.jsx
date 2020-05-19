@@ -55,7 +55,7 @@ class AssociatePage extends Component{
                         </Row>
                     </Card.Title>
                     <div id="main">
-                        <FloorPlan isAdmin={false} />
+                        <FloorPlan isAdmin={false} username={localStorage.getItem("username")} />
                     </div>
                 </Card.Body>
             </Card>
