@@ -362,6 +362,8 @@ setTimeout(()=>{
                         {
                             orderdata.products.forEach((item)=>{
                                 items.findOne({'products':{$elemMatch: {productId:item.productId}}},function(err3,itemdata){
+                                    console.log(itemdata);
+                                    console.log(item.productId);
                                     nodes+=itemdata.x.toString()+','+itemdata.y.toString()+','+orderdata.orderNo+','+item.description+'\n';
                                     //console.log(nodes);
                                 })
@@ -374,7 +376,7 @@ setTimeout(()=>{
                 console.log(nodes);
                 writeFile('./public/PathFinding/GridsCellsAndAstar/nodeslist.csv', nodes);
                 var d = new Date();
-            const ls = spawn('python', ['./public/PathFinding/GridsCellsAndAstar/ModScript.py',d.getUTCDate(),[150,50],[1550,150]]);
+            const ls = spawn('python3', ['./public/PathFinding/GridsCellsAndAstar/ModScript.py',d.getUTCDate(),[150,50],[1550,150]]);
 
             ls.stdout.on('data', (data) => {
                 console.log(`stdout: ${data}`);

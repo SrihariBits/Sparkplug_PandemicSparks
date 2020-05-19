@@ -24,6 +24,7 @@ class CustomerPage extends Component{
                 "customerID": localStorage.getItem("username"),
             },
             walketOrder: {
+                "status": "pending",
                 "ShipToAddress": {
                     "address": {
                         "addressLineTwo": "chennai, TN",
@@ -100,13 +101,13 @@ class CustomerPage extends Component{
         let walketOrder = this.state.walketOrder;
         walketOrder["products"]
             .push({
-                "productID": this.state.productList[event.target.value]["productID"],
+                "productId": this.state.productList[event.target.value]["productID"],
                 "description": this.state.productList[event.target.value]["description"],
                 "unitPrice": {
                     "currencyAmount": String(this.state.productList[event.target.value]["unitPrice"]),
                     "currencyUnit": this.state.productList[event.target.value]["currencyUnit"]
                 },
-                "orderQuantity": localStorage.getItem("quantity")
+                "orderQuantity": localStorage.getItem("quantity"),
             });
 
         console.log(currentOrder);
@@ -255,7 +256,7 @@ class CustomerPage extends Component{
 
     render() {
         return (
-            <Container>
+            <Container fluid>
                 <Navbar bg="primary" variant="dark">
                     <Navbar.Brand href="/home">Walmart</Navbar.Brand>
                     <Nav className="mr-auto">
