@@ -235,7 +235,7 @@ def directions(paths):
 
 def findshortestpath(time, start, end, nodeslist):
     
-    unpklfile = open("grid","rb")
+    unpklfile = open("/home/srihari/Desktop/Sparkplug_PandemicSparks/backend/public/PathFinding/GridsCellsAndAstar/grid","rb")
     grid = pickle.load(unpklfile)
     dims = (len(grid), len(grid[0]))
     unpklfile.close()
@@ -313,26 +313,31 @@ def findshortestpath(time, start, end, nodeslist):
     #         print(grid[i][j].cost, end=" ")
     #     print("\n")
 
-    os.remove("grid")
-    pklfile = open("grid","ab")
+    os.remove("/home/srihari/Desktop/Sparkplug_PandemicSparks/backend/public/PathFinding/GridsCellsAndAstar/grid")
+    pklfile = open("/home/srihari/Desktop/Sparkplug_PandemicSparks/backend/public/PathFinding/GridsCellsAndAstar/grid","ab")
     pickle.dump(grid,pklfile)
     pklfile.close()
     dirarr = directions(paths)
 
-    with open('../path.csv', 'w') as file:
+    with open('/home/srihari/Desktop/Sparkplug_PandemicSparks/backend/public/PathFinding/path.csv', 'w') as file:
         writer = csv.writer(file)
         writer.writerows(dirarr)
 
     return paths
 
 if __name__ == '__main__':
+    print(sys.argv[0])
+    print(sys.argv[1])
+    print(sys.argv[2])
+    print(sys.argv[3])
+    print(' ')
     time = int(sys.argv[1])
-    start = sys.argv[2][1:len(sys.argv[2])-1]
+    start = sys.argv[2][0:len(sys.argv[2])]
     start = start.split(',')
     for i in range(len(start)):
         start[i] = int(start[i])
     
-    end = sys.argv[3][1:len(sys.argv[3])-1]
+    end = sys.argv[3][0:len(sys.argv[3])]
     end = end.split(',')
     for i in range(len(end)):
         end[i] = int(end[i])
@@ -342,10 +347,11 @@ if __name__ == '__main__':
 
     nodeslist = []
 
-    with open('nodeslist.csv') as readfile:
+    with open('/home/srihari/Desktop/Sparkplug_PandemicSparks/backend/public/PathFinding/GridsCellsAndAstar/nodeslist.csv') as readfile:
         csvreader = csv.reader(readfile, delimiter=',')
+        print(csvreader)
         for row in csvreader:
-            # print(row)
+            print(row)
             tmp = []
             tmp.append(int(row[0]))
             tmp.append(int(row[1]))
