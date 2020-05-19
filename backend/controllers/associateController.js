@@ -2,6 +2,28 @@ var Associate = require("../public/Models/Associate.js")
 
 var async = require("async");
 
+exports.associate_get_userid = function(req, res) {
+
+    console.log("Associate GET: Fetching id for username " + req.params.username);
+
+   async.parallel({
+       'associate': function(callback) {
+           Associate.findOne({"username": req.params.username})
+           .exec(callback);
+       },
+   }, function(err, result) {
+        if(err){
+            console.log(err);
+            return res.json({
+                'status': 'failure',
+                'message': 'Associate GET ID: some error occured',
+            })
+        }
+
+        return res.json(result.associate);
+   });
+}
+
 exports.associate_create_get = function(req, res) {
     
     console.log('Associate GET: Fetching all associates');
