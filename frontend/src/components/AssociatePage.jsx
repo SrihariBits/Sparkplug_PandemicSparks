@@ -16,14 +16,16 @@ class AssociatePage extends Component{
         super(props);
         this.state = {
             status: true,
+            order: true,
+            map: false,
         };
     }
 
     componentWillMount() {
-        axios.get('http://127.0.0.1:5000/user/customer/' + localStorage.getItem("username"))
+        axios.get('http://127.0.0.1:5000/user/associate/' + localStorage.getItem("username"))
         .then(res => {
             if(res.data == null) {
-                console.log("Wrong username");
+                console.log("Wrong username for associate");
                 this.props.history.push(`/home`);
             }
             else {
@@ -48,7 +50,7 @@ class AssociatePage extends Component{
                                 Location Map
                             </Col>
                             <Col md={2}>
-                                <Button variant="primary" onClick={this.handleFinish}>Finish Order</Button>
+                                <Button variant="primary" onClick={this.handleFinish} disabled={this.state.status}>Finish Order</Button>
                             </Col>
                         </Row>
                     </Card.Title>
@@ -74,7 +76,7 @@ class AssociatePage extends Component{
                                 Currently Assigned Orders
                             </Col>
                             <Col md={2}>
-                                <Button variant="primary" onClick={this.handleAccept}>Accept Order</Button>
+                                <Button variant="primary" onClick={this.handleAccept} disabled={!this.state.status}>Accept Order</Button>
                             </Col>
                         </Row>
                     </Card.Title>
@@ -83,17 +85,26 @@ class AssociatePage extends Component{
         )
     }
 
+    handleMap = () => {
+        this.setState({map: true, order: false});
+    }
+
+    handleOrder = () => {
+        this.setState({map: false, order: true});
+    }
+
     render() {
         return (
             <Container>
                 <Navbar bg="primary" variant="dark">
                     <Navbar.Brand href="/home">Walmart</Navbar.Brand>
                     <Nav className="mr-auto">
-                        <Nav.Link href="#order">Order</Nav.Link>
+                        <Nav.Link href="#order" onClick={this.handleOrder}>Order</Nav.Link>
+                        <Nav.Link href="#map" onClick={this.handleMap}>Map</Nav.Link>
                     </Nav>
                 </Navbar>
-                {this.state.status && this.orderLayout()}
-                {!this.state.status && this.mapLayout()}
+                {this.state.order && this.orderLayout()}
+                {this.state.map && this.mapLayout()}
             </Container>
         )
     }

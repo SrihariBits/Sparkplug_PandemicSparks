@@ -8,7 +8,7 @@ import {Navbar,
         FormControl,
         FormLabel,
         Row,
-        Col
+        Col,
     } from "react-bootstrap";
 import {withRouter} from "react-router-dom";
 import axios from "axios";
@@ -73,7 +73,7 @@ class CustomerPage extends Component{
         axios.get('http://127.0.0.1:5000/user/customer/' + localStorage.getItem("username"))
         .then(res => {
             if(res.data == null){
-                console.log("Wrong username");
+                console.log("Wrong username for customer");
                 this.props.history.push(`/home`);
             }
             else{
@@ -265,7 +265,7 @@ class CustomerPage extends Component{
                 </Navbar>
                 {this.state.cart && this.state.cartList && this.cartLayout()}
                 {this.state.order && this.state.productList && this.orderLayout()}
-            </Container>    
+            </Container>
         )
     }
 }

@@ -14,4 +14,6 @@ router.get('/associate', associateController.associate_create_get);
 
 router.post('/associate', associateController.associate_create_post);
 
+router.get('/associate/:username', associateController.associate_get_userid);
+
 module.exports = router;
