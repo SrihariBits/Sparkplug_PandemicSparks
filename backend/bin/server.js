@@ -52,7 +52,7 @@ var batches = require('./../public/Models/Batches');
 
 //////////////////////////////////// WALKET ORDERS/////////////////////////////////////////////////////
 
-let message=new walkets({
+/*let message=new walkets({
     status:'pending',
     ShipToAddress:{
         address:{
@@ -106,7 +106,7 @@ walkets.findOne({orderNo:message.orderNo},function(err,data){
     {
         message.save();
     }
-});
+});*/
 
 ///////////////////////////////////////////// PRIMARY CLUSTERING /////////////////////////////////////////////////
 
@@ -145,7 +145,9 @@ app.post('/findPrimaryCluster',(req,res) => {
 
 ///////////////////////////////// GET ORDERS IN FIFO AND BATCHING //////////////////////////////////////
 
-setInterval(()=>{
+//setInterval(()=>{
+function callme()
+{
     var numberToReceive = 10;
     var currentOrders = [];
     var itemToClusters = new Map();
@@ -339,14 +341,16 @@ setInterval(()=>{
                 });
                 msg.save();
             })
-            },500);
+            },200);
       });
-},3000)
+}
 
 //////////////////////////////////// CALL PATH FINDING ALGO ///////////////////////////////////////////
 const spawn = require('child_process').spawn;
 //setTimeout(()=>{
 app.post('/associatefree',(req,res)=>{
+    callme();
+    setInterval(()=>{
     batches.findOne({status:{ $eq: 'pending' }},function(err1,batchdata){
         if(err1)
         {
@@ -396,7 +400,7 @@ app.post('/associatefree',(req,res)=>{
             },2000);
         }
     });
-
+},3000)
     //MAKE ASSOCIATE WAIT TILL I SAY READY
 })
 
