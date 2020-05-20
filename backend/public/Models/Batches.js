@@ -3,6 +3,7 @@ var Schema = mongoose.Schema;
 
 var Batches=new mongoose.Schema({
     status:String,
+    username:String,
     orders:[{orderId:String}],
     event_time: Date
 });

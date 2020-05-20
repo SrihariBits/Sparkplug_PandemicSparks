@@ -345,8 +345,8 @@ setInterval(()=>{
 
 //////////////////////////////////// CALL PATH FINDING ALGO ///////////////////////////////////////////
 const spawn = require('child_process').spawn;
-setTimeout(()=>{
-//app.post('/associatefree',(req,res)=>{
+//setTimeout(()=>{
+app.post('/associatefree',(req,res)=>{
     batches.findOne({status:{ $eq: 'pending' }},function(err1,batchdata){
         if(err1)
         {
@@ -389,6 +389,7 @@ setTimeout(()=>{
                 console.log(`child process exited with code ${code}`);
               });
               batchdata.status='taken';
+              batchdata.username = req.body.username;
                 batchdata.save((err)=>{
                     if(err)console.log(err);
                 });
@@ -397,7 +398,7 @@ setTimeout(()=>{
     });
 
     //MAKE ASSOCIATE WAIT TILL I SAY READY
-},5000)
+})
 
 //////////////////////////////////////// CELL's ITEMS /////////////////////////////////////////////////
 
