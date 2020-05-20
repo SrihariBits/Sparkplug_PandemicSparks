@@ -48,7 +48,7 @@ class CustomerPage extends Component{
                         "currencyUnit": "USD"
                     }
                 },
-                "orderNo": "1a2b3c4d",
+                "orderNo": "",
                 "products": [],
                 "event_time": ""
             }
@@ -123,6 +123,7 @@ class CustomerPage extends Component{
 
         let walketOrder = this.state.walketOrder;
         walketOrder["event_time"] = new Date();
+        walketOrder["orderNo"] = (+new Date).toString(36);
         console.log(walketOrder);
 
         axios.post('http://127.0.0.1:5000/products/walket', walketOrder)
