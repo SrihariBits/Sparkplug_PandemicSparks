@@ -37,7 +37,7 @@ class AssociatePage extends Component{
     }
 
     handleFinish = () => {
-        this.setState({status: true});
+        this.setState({status: true});  
     }
 
     mapLayout = () => {
@@ -63,6 +63,10 @@ class AssociatePage extends Component{
     }
 
     handleAccept = () => {
+        axios.post('http://127.0.0.1:5000/associatefree', {'username': localStorage.getItem("username")})
+        .then(res => {
+            console.log(res);
+        })
         this.setState({status: false});
     }
 
